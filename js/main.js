@@ -6,6 +6,10 @@ var water;
 var water2;
 var crust;
 var clouds;
+
+var grassLayer;
+var rockLayer;
+
 var plusKey = false;
 var minusKey = false;
 var upKey = false;
@@ -47,6 +51,9 @@ function init() {
     addWater();
     generateTerrain();
     addClouds();
+
+    addDecorLayers();
+
 
     stage.update();
 
@@ -221,6 +228,26 @@ function update(e) {
         }
         stage.update();
     }
+}
+
+function addDecorLayers(){
+
+    var image = new Image();
+    image.src = "../assets/rocklayer.svg"
+    rockLayer = new createjs.Bitmap(image).set({scaleX:5, scaleY:5});
+    rockLayer.x = planet.x - planetRadius * 2.5;
+    rockLayer.y = planet.y - planetRadius * 2.5;
+    rockLayer.mask = crust;
+    container.addChild(rockLayer);
+
+    var image = new Image();
+    image.src = "../assets/grasslayer.svg"
+    grassLayer = new createjs.Bitmap(image).set({scaleX:5, scaleY:5});
+    grassLayer.alpha = .5;
+    grassLayer.x = planet.x - planetRadius * 2.5;
+    grassLayer.y = planet.y - planetRadius * 2.5;
+    grassLayer.mask = crust;
+    container.addChild(grassLayer);
 }
 
 function getCenter() {
