@@ -2,9 +2,9 @@ var stage;
 var container;
 var planet;
 var planetRadius = 100;
+var water;
 var crust;
 var clouds;
-var selectedArea;
 var plusKey = false;
 var minusKey = false;
 var upKey = false;
@@ -16,7 +16,8 @@ var selectUpKey = false;
 var selectDownKey = false;
 var selectLeftKey = false;
 var selectRightKey = false;
-
+var rotateLeftKey = false;
+var rotateRightKey = false;
 function debug() {
     debugger;
 }
@@ -35,16 +36,16 @@ function init() {
     container.x = window.innerWidth / 2;
     container.y = window.innerHeight / 2;
 
+
     stage.addChild(container);
     planet = new createjs.Shape();
     planet.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, planetRadius);
     planet.x = window.innerWidth / 2;
     planet.y = window.innerHeight / 2;
     container.addChild(planet);
-
+    addWater();
     generateTerrain();
     addClouds();
-    addSelector();
 
     stage.update();
 
@@ -55,18 +56,47 @@ function init() {
 
 }
 
+function addWater() {
+    water = new createjs.Shape();
+    water.graphics.beginFill("blue").drawCircle(0, 0, planetRadius + 50);
+    water.alpha = .5;
+    water.x = window.innerWidth / 2;
+    water.y = window.innerHeight / 2;
+    container.addChild(water);
+}
+
 function generateTerrain() {
+    var totalMountains = 0;
+    var totalOceans = 0;
     var mountainFreq = 10;//gets less likely the higher this gets
-    var mountainHeight = 30;
-    var points = 20;
+    var mountainHeight = 20;
+    var oceanFreq = 10;
+    var oceanWidth = 2;
+    var oceanDepth = 20;
+    var oceanCounter = 0;//oceans can be multiple sides wide, so we need a counter
+    var points = 30;
     crust = new createjs.Shape();
-    crust.graphics.beginFill("gray");
+    crust.graphics.beginFill("#6d380f");
     for (var i = 0; i < points; i++) {
         var offset = 50;
         var variance = 30;
         var finalOffset = offset + (Math.random() * variance);
-        if ((Math.random() * mountainFreq) <= 1)
+        if ((Math.random() * oceanFreq) <= 1 && oceanCounter <= 0) {
+            oceanCounter = 3;
+            while ((Math.random() * oceanFreq) <= 1)
+                oceanCounter++;
+        }
+        else if ((Math.random() * mountainFreq) <= 1) {
             finalOffset += mountainHeight * (Math.random() * 2);
+            totalMountains++;
+        }
+
+        //applies an ocean if needed
+        if (oceanCounter > 0) {
+            finalOffset -= oceanDepth;
+            oceanCounter--;
+            totalOceans++;
+        }
         var x = planet.x + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i));
         var y = planet.y + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i));
         crust.graphics.lineTo(x, y);
@@ -78,7 +108,7 @@ function generateTerrain() {
 function addClouds() {
     clouds = new createjs.Shape();
     clouds.graphics.beginFill("white").drawCircle(0, 0, planetRadius + 150);
-    clouds.alpha = .5;
+    clouds.alpha = .3;
     clouds.x = window.innerWidth / 2;
     clouds.y = window.innerHeight / 2;
     var blurFilter = new createjs.BlurFilter(50, 50, 1);
@@ -86,14 +116,6 @@ function addClouds() {
     var bounds = blurFilter.getBounds();
     clouds.cache(-200 + bounds.x, -200 + bounds.y, 400 + bounds.width, 400 + bounds.height);
     container.addChild(clouds);
-}
-function addSelector() {
-    selectedArea = new createjs.Shape();
-    selectedArea.graphics.beginFill("red").drawCircle(0, 0, 30);
-    selectedArea.alpha = .2;
-    selectedArea.x = window.innerWidth / 2;
-    selectedArea.y = window.innerHeight / 2;
-    container.addChild(selectedArea);
 }
 
 function toRadians(degrees) {
@@ -110,17 +132,42 @@ function update(e) {
     //run everything in here!
     if (!e.paused) {
 
-        container.regX = selectedArea.x;
-        container.regY = selectedArea.y;
-
         if (plusKey && container.scaleX < 20) {
+
+            var holder = container.rotation;
+            container.rotation = 0;
+            var pointbefore = getCenter();
             container.scaleX += .03 + (container.scaleX / 20);
             container.scaleY += .03 + (container.scaleY / 20);
+            stage.update();
+            var pointafter = getCenter();
+
+            var pointdiffX = pointafter.x - pointbefore.x;
+            var pointdiffY = pointafter.y - pointbefore.y;
+            container.x += (pointdiffX * container.scaleX);
+            container.y += (pointdiffY * container.scaleY);
+            stage.update();
+            container.rotation = holder;
         }
         if (minusKey && container.scaleX > .6) {
+
+            var holder = container.rotation;
+            container.rotation = 0;
+
+            var pointbefore = getCenter();
             container.scaleX += -.03 - (container.scaleX / 20);
             container.scaleY += -.03 - (container.scaleY / 20);
+            stage.update();
+            var pointafter = getCenter();
+
+            var pointdiffX = pointafter.x - pointbefore.x;
+            var pointdiffY = pointafter.y - pointbefore.y;
+            container.x += pointdiffX * container.scaleX;
+            container.y += pointdiffY * container.scaleY;
+            stage.update();
+            container.rotation = holder;
         }
+
         var movement = shiftKey ? 2 : 1;
         for (var i = 0; i < movement; i++) {
             if (downKey) {
@@ -132,23 +179,25 @@ function update(e) {
                 container.x += -5 - (container.scaleX / 5);
             else if (leftKey)
                 container.x += 5 + (container.scaleX / 5);
-            if (selectUpKey)
-                selectedArea.y -= 5;
-            else if (selectDownKey)
-                selectedArea.y += 5;
-            if (selectLeftKey)
-                selectedArea.x -= 5;
-            else if (selectRightKey)
-                selectedArea.x += 5;
         }
-        clouds.alpha = .5;
-        selectedArea.alpha = .2;
+        clouds.alpha = .3;
         if (container.scaleX > 3.5) {
-            clouds.alpha -= (container.scaleX / 20);
-            selectedArea.alpha -= (container.scaleX / 30);
+            clouds.alpha -= (container.scaleX / 25);
+        }
+
+        if (!plusKey && !minusKey) {
+            if (rotateLeftKey) {
+                container.rotation -= 1;
+            } else if (rotateRightKey) {
+                container.rotation += 1;
+            }
         }
         stage.update();
     }
+}
+
+function getCenter() {
+    return container.globalToLocal(window.innerWidth / 2, window.innerHeight / 2);
 }
 
 window.onkeyup = function (e) {
@@ -185,17 +234,11 @@ window.onkeyup = function (e) {
         case (16):
             shiftKey = false;
             break;
-        case (38):
-            selectUpKey = false;
+        case (90):
+            rotateLeftKey = false;
             break;
-        case (40):
-            selectDownKey = false;
-            break;
-        case (37):
-            selectLeftKey = false;
-            break;
-        case (39):
-            selectRightKey = false;
+        case (88):
+            rotateRightKey = false;
             break;
     }
 }
@@ -224,17 +267,11 @@ window.onkeydown = function (e) {
         case (16):
             shiftKey = true;
             break;
-        case (38):
-            selectUpKey = true;
+        case (90):
+            rotateLeftKey = true;
             break;
-        case (40):
-            selectDownKey = true;
-            break;
-        case (37):
-            selectLeftKey = true;
-            break;
-        case (39):
-            selectRightKey = true;
+        case (88):
+            rotateRightKey = true;
             break;
     }
 }
