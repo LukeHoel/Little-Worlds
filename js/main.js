@@ -3,6 +3,7 @@ var container;
 var planet;
 var planetRadius = 100;
 var water;
+var water2;
 var crust;
 var clouds;
 var plusKey = false;
@@ -57,12 +58,36 @@ function init() {
 }
 
 function addWater() {
+    // water = new createjs.Shape();
+    // water.graphics.beginFill("blue").drawCircle(0, 0, planetRadius + 50);
+    // water.alpha = .5;
+    // water.x = window.innerWidth / 2;
+    // water.y = window.innerHeight / 2;
+    // container.addChild(water);
     water = new createjs.Shape();
-    water.graphics.beginFill("blue").drawCircle(0, 0, planetRadius + 50);
+    water.graphics.beginFill("blue");
     water.alpha = .5;
     water.x = window.innerWidth / 2;
     water.y = window.innerHeight / 2;
+    water2 = new createjs.Shape();
+    water2.graphics.beginFill("darkblue");
+    water2.alpha = .5;
+    water2.x = window.innerWidth / 2;
+    water2.y = window.innerHeight / 2;
+    var points = 10;
+    for (var i = 0; i < points; i++) {
+        var x = (planetRadius + 50) * Math.sin(toRadians((360 / points) * i));
+        var y = (planetRadius + 50) * Math.cos(toRadians((360 / points) * i));
+        water.graphics.lineTo(x, y);
+        water2.graphics.lineTo(x, y);
+    }
+    water.rotation = 45;
+    water2.scale = 1.03;
+    container.addChild(water2);
     container.addChild(water);
+
+    createjs.Tween.get(water, { loop: true }).to({ scale: 1.03 }, 2000).to({ scale: 1 }, 2000);
+    createjs.Tween.get(water2, { loop: true }).to({ scale: 1 }, 2000).to({ scale: 1.03 }, 2000);
 }
 
 function generateTerrain() {
@@ -70,21 +95,20 @@ function generateTerrain() {
     var totalOceans = 0;
     var mountainFreq = 10;//gets less likely the higher this gets
     var mountainHeight = 20;
-    var oceanFreq = 10;
-    var oceanWidth = 2;
-    var oceanDepth = 20;
+    var oceanFreq = 5;
+    var oceanWidth = 3;
+    var oceanDepth = 25;
     var oceanCounter = 0;//oceans can be multiple sides wide, so we need a counter
     var points = 30;
     crust = new createjs.Shape();
-    crust.graphics.beginFill("#6d380f");
+    crust.graphics.beginFill("#874512");
+
     for (var i = 0; i < points; i++) {
         var offset = 50;
         var variance = 30;
         var finalOffset = offset + (Math.random() * variance);
         if ((Math.random() * oceanFreq) <= 1 && oceanCounter <= 0) {
-            oceanCounter = 3;
-            while ((Math.random() * oceanFreq) <= 1)
-                oceanCounter++;
+            oceanCounter = oceanWidth;
         }
         else if ((Math.random() * mountainFreq) <= 1) {
             finalOffset += mountainHeight * (Math.random() * 2);
@@ -96,11 +120,14 @@ function generateTerrain() {
             finalOffset -= oceanDepth;
             oceanCounter--;
             totalOceans++;
+
         }
         var x = planet.x + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i));
         var y = planet.y + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i));
         crust.graphics.lineTo(x, y);
     }
+
+
     crust.graphics.closePath();
     container.addChild(crust);
 }
