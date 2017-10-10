@@ -1,6 +1,9 @@
 var stage;
+var container;
 var planet;
-var scale = 1;
+var planetRadius = 100;
+var plusKey = false;
+var minusKey = false;
 var upKey = false;
 var downKey = false;
 var leftKey = false;
@@ -18,15 +21,21 @@ function init() {
     window.addEventListener('resize', resize, false);
 
     stage = new createjs.Stage("canvas");
+    container = new createjs.Container();
+    container.regX = window.innerWidth / 2;
+    container.regY = window.innerHeight / 2;
+    container.x = window.innerWidth / 2;
+    container.y = window.innerHeight / 2;
 
+    stage.addChild(container);
     planet = new createjs.Shape();
-    planet.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, 100);
+    planet.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, planetRadius);
     planet.x = window.innerWidth / 2;
     planet.y = window.innerHeight / 2;
     planetX = planet.x;
     planetY = planet.y;
-    stage.addChild(planet);
-
+    container.addChild(planet);
+    generateTerrain();
     stage.update();
 
     createjs.Ticker.framerate = 60;
@@ -36,34 +45,61 @@ function init() {
 
 }
 
+function generateTerrain() {
+    var points = 10;
+
+    for (var i = 0; i < points; i++) {
+        var offset = 50;
+        var x = planet.x + (planetRadius + offset) * Math.sin(toRadians((360 / points) * i));
+        var y = planet.y + (planetRadius + offset) * Math.cos(toRadians((360 / points) * i));
+        var circle = new createjs.Shape();
+        circle.graphics.beginFill("red").drawCircle(0, 0, 5);
+        circle.x = x;
+        circle.y = y;
+        container.addChild(circle);
+    }
+}
+
+function toRadians(degrees) {
+    var pi = Math.PI;
+    return degrees * (pi / 180);
+}
+
 function resize() {
     var canvas = document.getElementsByTagName('canvas')[0];
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 }
-
 function update(e) {
     //run everything in here!
     if (!e.paused) {
         // Actions carried out when the Ticker is not paused
-        if (planet.scaleX > scale + .03)
-            planet.scaleX -= .03;
-        else if (planet.scaleX < scale - .03)
-            planet.scaleX += .03;
+        // if (container.scaleX > scale + .03)
+        //     container.scaleX -= .03;
+        // else if (container.scaleX < scale - .03)
+        //     container.scaleX += .03;
 
-        if (planet.scaleY > scale + .03)
-            planet.scaleY -= .03;
-        else if (planet.scaleY < scale - .03)
-            planet.scaleY += .03;
-        
-        if(upKey)
-            planet.y -= 5;
-        else if(downKey)
-            planet.y += 5;
-        if(leftKey)
-            planet.x -= 5;
-        else if(rightKey)
-            planet.x += 5;
+        // if (container.scaleY > scale + .03)
+        //     container.scaleY -= .03;
+        // else if (container.scaleY < scale - .03)
+        //     container.scaleY += .03;
+
+        if (plusKey && container.scaleX < 10) {
+            container.scaleX += .03 + (container.scaleX / 20);
+            container.scaleY += .03 + (container.scaleY / 20);
+        }
+        if (minusKey && container.scaleX > .6) {
+            container.scaleX += -.03 - (container.scaleX / 20);
+            container.scaleY += -.03 - (container.scaleY / 20);
+        }
+        if (upKey)
+            container.y += -5 - (container.scaleX / 5);
+        else if (downKey)
+            container.y += 5 + (container.scaleX / 5);
+        if (leftKey)
+            container.x += -5 - (container.scaleX / 5);
+        else if (rightKey)
+            container.x += 5 + (container.scaleX / 5);
         stage.update();
     }
 }
@@ -72,11 +108,14 @@ window.onkeyup = function (e) {
     var key = e.keyCode ? e.keyCode : e.which;
 
     switch (key) {
+        case (32):
+            debug();
+            break;
         case (187):
-            zoomIn();
+            plusKey = false;
             break;
         case (189):
-            zoomOut();
+            minusKey = false;
             break;
         case (87):
             upKey = false;
@@ -96,6 +135,12 @@ window.onkeydown = function (e) {
     var key = e.keyCode ? e.keyCode : e.which;
 
     switch (key) {
+        case (187):
+            plusKey = true;
+            break;
+        case (189):
+            minusKey = true;
+            break;
         case (87):
             upKey = true;
             break;
@@ -112,11 +157,7 @@ window.onkeydown = function (e) {
 }
 function zoomIn() {
     scale += .5;
-    stage.update();
 }
 function zoomOut() {
-    if (scale > 1) {
-        scale -= .5;
-        stage.update();
-    }
+    scale -= .5;
 }
