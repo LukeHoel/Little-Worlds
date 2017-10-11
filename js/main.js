@@ -1,13 +1,12 @@
 var stage;
 var container;
 var planet;
-var planetRadius = 100;
+var planetRadius = 500;
 var water;
 var water2;
 var ground;
 var crust;
 var clouds;
-
 var grassLayer;
 var rockLayer;
 
@@ -53,10 +52,11 @@ function init() {
     generateTerrain();
     addClouds();
 
-    addDecorLayers();
+    //addDecorLayers();
 
     container.rotation = Math.random() * 180;
-
+    container.scaleX = .5;
+    container.scaleY = .5;
     stage.update();
 
     createjs.Ticker.framerate = 60;
@@ -73,13 +73,14 @@ function addWater() {
     // water.x = window.innerWidth / 2;
     // water.y = window.innerHeight / 2;
     // container.addChild(water);
+    var waterColor = randomColor();
     water = new createjs.Shape();
-    water.graphics.beginFill("blue");
+    water.graphics.beginFill(waterColor);
     water.alpha = .5;
     water.x = window.innerWidth / 2;
     water.y = window.innerHeight / 2;
     water2 = new createjs.Shape();
-    water2.graphics.beginFill("darkblue");
+    water2.graphics.beginFill(waterColor);
     water2.alpha = .5;
     water2.x = window.innerWidth / 2;
     water2.y = window.innerHeight / 2;
@@ -103,18 +104,19 @@ function generateTerrain() {
     var totalMountains = 0;
     var totalOceans = 0;
     var mountainFreq = 10;//gets less likely the higher this gets
-    var mountainHeight = 20;
-    var oceanFreq = 5;
+    var mountainHeight = 50;
+    var oceanFreq = 10;
     var oceanWidth = 3;
-    var oceanDepth = 25;
+    var oceanDepth = 60;
     var oceanCounter = 0;//oceans can be multiple sides wide, so we need a counter
-    var points = 30;
+    var points = 100;
     crust = new createjs.Shape();
-    crust.graphics.beginFill("#874512");
     ground = new createjs.Shape();
-    ground.graphics.beginFill("#705239");
+    //ground.graphics.beginFill("#705239");
+    var color1 = randomColor();
+    ground.graphics.beginFill(color1);
     for (var i = 0; i < points; i++) {
-        var offset = 50;
+        var offset = 70;
         var variance = 30;
         var finalOffset = offset + (Math.random() * variance);
         if ((Math.random() * oceanFreq) <= 1 && oceanCounter <= 0) {
@@ -132,10 +134,10 @@ function generateTerrain() {
             totalOceans++;
 
         }
-        var x = planet.x + (planetRadius + finalOffset - 10) * Math.sin(toRadians((360 / points) * i));
-        var y = planet.y + (planetRadius + finalOffset - 10) * Math.cos(toRadians((360 / points) * i));
+        var x = planet.x + (planetRadius + finalOffset - 15) * Math.sin(toRadians((360 / points) * i));
+        var y = planet.y + (planetRadius + finalOffset - 15) * Math.cos(toRadians((360 / points) * i));
         crust.graphics.lineTo(x, y);
-        ground.graphics.lineTo(planet.x + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i)),planet.y + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i)));
+        ground.graphics.lineTo(planet.x + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i)), planet.y + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i)));
     }
 
     ground.graphics.closePath();
@@ -147,14 +149,14 @@ function generateTerrain() {
 
 function addClouds() {
     clouds = new createjs.Shape();
-    clouds.graphics.beginFill("white").drawCircle(0, 0, planetRadius + 150);
+    clouds.graphics.beginFill(randomColor()).drawCircle(0, 0, planetRadius + 300);
     clouds.alpha = .3;
     clouds.x = window.innerWidth / 2;
     clouds.y = window.innerHeight / 2;
     var blurFilter = new createjs.BlurFilter(50, 50, 1);
     clouds.filters = [blurFilter];
     var bounds = blurFilter.getBounds();
-    clouds.cache(-200 + bounds.x, -200 + bounds.y, 400 + bounds.width, 400 + bounds.height);
+    clouds.cache(-700 + bounds.x, -700 + bounds.y, 1400 + bounds.width, 1400 + bounds.height);
     container.addChild(clouds);
 }
 
@@ -189,7 +191,7 @@ function update(e) {
             stage.update();
             container.rotation = holder;
         }
-        if (minusKey && container.scaleX > .6) {
+        if (minusKey && container.scaleX > .3) {
 
             var holder = container.rotation;
             container.rotation = 0;
@@ -220,11 +222,12 @@ function update(e) {
             else if (leftKey)
                 container.x += 5 + (container.scaleX / 5);
         }
-        clouds.alpha = .3;
-        if (container.scaleX > 3.5) {
-            clouds.alpha -= (container.scaleX / 25);
+        if (clouds != null) {
+            clouds.alpha = .3;
+            if (container.scaleX > 3.5) {
+                clouds.alpha -= (container.scaleX / 25);
+            }
         }
-
         if (!plusKey && !minusKey) {
             if (rotateLeftKey) {
                 container.rotation -= 1;
@@ -236,13 +239,13 @@ function update(e) {
     }
 }
 
-function addDecorLayers(){
+function addDecorLayers() {
 
     var image = new Image();
     image.src = "../assets/rocklayer.svg"
-    rockLayer = new createjs.Bitmap(image).set({scaleX:5, scaleY:5});
-    rockLayer.x = (window.innerWidth/2);
-    rockLayer.y = (window.innerHeight/2);
+    rockLayer = new createjs.Bitmap(image).set({ scaleX: 15, scaleY: 15 });
+    rockLayer.x = (window.innerWidth / 2);
+    rockLayer.y = (window.innerHeight / 2);
     rockLayer.regX += 50;
     rockLayer.regY += 50;
     rockLayer.rotation = Math.random() * 180;
@@ -251,9 +254,9 @@ function addDecorLayers(){
 
     var image = new Image();
     image.src = "../assets/grasslayer.svg"
-    grassLayer = new createjs.Bitmap(image).set({scaleX:5, scaleY:5});
-    grassLayer.x = (window.innerWidth/2);
-    grassLayer.y = (window.innerHeight/2);
+    grassLayer = new createjs.Bitmap(image).set({ scaleX: 15, scaleY: 15 });
+    grassLayer.x = (window.innerWidth / 2);
+    grassLayer.y = (window.innerHeight / 2);
     grassLayer.regX += 50;
     grassLayer.regY += 50;
     grassLayer.rotation = Math.random() * 180;
@@ -275,8 +278,8 @@ window.onkeyup = function (e) {
 
     switch (key) {
         case (72):
-            container.scaleX = 1;
-            container.scaleY = 1;
+            container.scaleX = .5;
+            container.scaleY = .5;
             container.x = container.regX;
             container.y = container.regY;
             break;
@@ -344,6 +347,16 @@ window.onkeydown = function (e) {
             rotateRightKey = true;
             break;
     }
+}
+function luminanace(hex) {
+    var c = hex.substring(1);      // strip #
+    var rgb = parseInt(c, 16);   // convert rrggbb to decimal
+    var r = (rgb >> 16) & 0xff;  // extract red
+    var g = (rgb >> 8) & 0xff;  // extract green
+    var b = (rgb >> 0) & 0xff;  // extract blue
+
+    var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return luma;
 }
 function zoomIn() {
     scale += .5;
