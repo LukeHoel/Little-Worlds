@@ -124,31 +124,44 @@ function placeFoliage() {
             var num = Math.random();
             var x = (landSegments[i].x * (1 - num) + num * landSegments[i + 1].x);
             var y = (landSegments[i].y * (1 - num) + landSegments[i + 1].y * num);
-            if (landSegments[i].isOcean == false) { 
-            foliageContainer.addChild(bush);
+            if (landSegments[i].isOcean == false) {
+                foliageContainer.addChild(bush);
 
-            bush.x = x;
-            bush.y = y;
-            switch (getRandomInt(0, 5)) {
-                case (0):
-                    bush.graphics.drawCircle(-2, 0, 3);
-                    bush.graphics.drawCircle(2, 0, 3);
-                    bush.graphics.drawCircle(0, 2.5, 3);
-                    bush.resource = "food";
-                    bush.amount = 1;
-                    break;
-                case (1):
-                    bush.graphics.drawCircle(-3, 1, 5);
-                    bush.graphics.drawCircle(2, 1, 5);
-                    bush.graphics.drawCircle(0, 4, 5);
-                    bush.resource = "food";
-                    bush.amount = 3;
-                    break;
+                bush.x = x;
+                bush.y = y;
+                switch (getRandomInt(0, 5)) {
+                    case (0):
+                        bush.graphics.drawCircle(-2, 0, 3);
+                        bush.graphics.drawCircle(2, 0, 3);
+                        bush.graphics.drawCircle(0, 2.5, 3);
+                        bush.resource = "food";
+                        bush.amount = 1;
+                        break;
+                    case (1):
+                        bush.graphics.drawCircle(-3, 1, 5);
+                        bush.graphics.drawCircle(2, 1, 5);
+                        bush.graphics.drawCircle(0, 4, 5);
+                        bush.resource = "food";
+                        bush.amount = 3;
+                        break;
+                    case (2):
+                        bush.graphics.beginFill(colors[0]);
+                        bush.graphics.drawRect(-7,-2,5,8);
+                        bush.graphics.beginFill(colors[1]);
+                        bush.graphics.moveTo(-12,5);
+                        bush.graphics.lineTo(-5,30);
+                        bush.graphics.lineTo(4,5);
+                        bush.graphics.closePath();
+                        bush.resource = "wood";
+                        bush.amount = 2;
+                        
+                        foliageContainer.setChildIndex(bush, 0)
+                        break;
+                }
+                bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
             }
-            bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
         }
     }
-}
 }
 
 function getRandomInt(min, max) {
@@ -290,8 +303,8 @@ function update(e) {
         }
 
         foliageContainer.alpha = 0;
-        if(container.scaleX > 1.4){
-            foliageContainer.alpha = container.scaleX/2.5;
+        if (container.scaleX > 1.4) {
+            foliageContainer.alpha = container.scaleX / 2.5;
         }
 
         stage.update();
