@@ -13,6 +13,8 @@ var groundColor;
 
 var landSegments = [];
 var foliageContainer;
+var treeContainer;
+var foliageOpacity = 0;
 
 var plusKey = false;
 var minusKey = false;
@@ -41,10 +43,12 @@ function init() {
     stage = new createjs.Stage("canvas");
     container = new createjs.Container();
     foliageContainer = new createjs.Container;
+    treeContainer = new createjs.Container;
     container.regX = window.innerWidth / 2;
     container.regY = window.innerHeight / 2;
     container.x = window.innerWidth / 2;
     container.y = window.innerHeight / 2;
+    container.addChild(treeContainer);
     container.addChild(foliageContainer);
 
     stage.addChild(container);
@@ -65,6 +69,7 @@ function init() {
     container.scaleY = .3;
     container.setChildIndex(foliageContainer, container.numChildren - 1)
     foliageContainer.alpha = 0;
+    treeContainer.alpha = 0;
     stage.update();
 
     createjs.Ticker.framerate = 60;
@@ -111,7 +116,7 @@ function addWater() {
 function placeFoliage() {
     var foliageCount = 2;
     var colors = [];
-    var colorCount = 3;
+    var colorCount = 4;
     for (var i = 0; i < colorCount; i++) {
         colors.push(randomColor());
     }
@@ -125,7 +130,7 @@ function placeFoliage() {
             var x = (landSegments[i].x * (1 - num) + num * landSegments[i + 1].x);
             var y = (landSegments[i].y * (1 - num) + landSegments[i + 1].y * num);
             if (landSegments[i].isOcean == false) {
-                foliageContainer.addChild(bush);
+                
 
                 bush.x = x;
                 bush.y = y;
@@ -136,6 +141,7 @@ function placeFoliage() {
                         bush.graphics.drawCircle(0, 2.5, 3);
                         bush.resource = "food";
                         bush.amount = 1;
+                        foliageContainer.addChild(bush);
                         break;
                     case (1):
                         bush.graphics.drawCircle(-3, 1, 5);
@@ -143,19 +149,32 @@ function placeFoliage() {
                         bush.graphics.drawCircle(0, 4, 5);
                         bush.resource = "food";
                         bush.amount = 3;
+                        foliageContainer.addChild(bush);
                         break;
                     case (2):
                         bush.graphics.beginFill(colors[0]);
-                        bush.graphics.drawRect(-7,-2,5,8);
+                        bush.graphics.drawRect(-7, -12, 5, 18);
                         bush.graphics.beginFill(colors[1]);
-                        bush.graphics.moveTo(-12,5);
-                        bush.graphics.lineTo(-5,30);
-                        bush.graphics.lineTo(4,5);
+                        bush.graphics.moveTo(-12, 5);
+                        bush.graphics.lineTo(-5, 30);
+                        bush.graphics.lineTo(4, 5);
                         bush.graphics.closePath();
                         bush.resource = "wood";
                         bush.amount = 2;
-                        
-                        foliageContainer.setChildIndex(bush, 0)
+                        treeContainer.addChild(bush);
+                        break;
+                    case (3):
+                        bush.graphics.beginFill(colors[2]);
+                        bush.graphics.drawRect(-11, -12, 9, 23);
+                        bush.graphics.beginFill(colors[3]);
+                        bush.graphics.moveTo(-17, 10);
+                        bush.graphics.lineTo(-6, 50);
+                        bush.graphics.lineTo(4, 10);
+                        bush.graphics.closePath();
+                        bush.resource = "wood";
+                        bush.amount = 2;
+
+                        treeContainer.addChild(bush);
                         break;
                 }
                 bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
@@ -302,9 +321,13 @@ function update(e) {
             }
         }
 
-        foliageContainer.alpha = 0;
-        if (container.scaleX > 1.4) {
-            foliageContainer.alpha = container.scaleX / 2.5;
+        treeContainer.alpha = foliageContainer.alpha = foliageOpacity;
+        if (container.scaleX > 1.2) {
+            if (foliageOpacity < 1)
+                foliageOpacity += .1
+        } else {
+            if (foliageOpacity > 0)
+                foliageOpacity -= .1
         }
 
         stage.update();
