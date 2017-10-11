@@ -54,6 +54,7 @@ function init() {
 
     addDecorLayers();
 
+    container.rotation = Math.random() * 180;
 
     stage.update();
 
