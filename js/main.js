@@ -4,6 +4,7 @@ var planet;
 var planetRadius = 100;
 var water;
 var water2;
+var ground;
 var crust;
 var clouds;
 
@@ -110,7 +111,8 @@ function generateTerrain() {
     var points = 30;
     crust = new createjs.Shape();
     crust.graphics.beginFill("#874512");
-
+    ground = new createjs.Shape();
+    ground.graphics.beginFill("#705239");
     for (var i = 0; i < points; i++) {
         var offset = 50;
         var variance = 30;
@@ -130,11 +132,14 @@ function generateTerrain() {
             totalOceans++;
 
         }
-        var x = planet.x + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i));
-        var y = planet.y + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i));
+        var x = planet.x + (planetRadius + finalOffset - 10) * Math.sin(toRadians((360 / points) * i));
+        var y = planet.y + (planetRadius + finalOffset - 10) * Math.cos(toRadians((360 / points) * i));
         crust.graphics.lineTo(x, y);
+        ground.graphics.lineTo(planet.x + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i)),planet.y + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i)));
     }
 
+    ground.graphics.closePath();
+    container.addChild(ground);
 
     crust.graphics.closePath();
     container.addChild(crust);
@@ -236,19 +241,29 @@ function addDecorLayers(){
     var image = new Image();
     image.src = "../assets/rocklayer.svg"
     rockLayer = new createjs.Bitmap(image).set({scaleX:5, scaleY:5});
-    rockLayer.x = planet.x - planetRadius * 2.5;
-    rockLayer.y = planet.y - planetRadius * 2.5;
+    rockLayer.x = (window.innerWidth/2);
+    rockLayer.y = (window.innerHeight/2);
+    rockLayer.regX += 50;
+    rockLayer.regY += 50;
+    rockLayer.rotation = Math.random() * 180;
     rockLayer.mask = crust;
     container.addChild(rockLayer);
 
     var image = new Image();
     image.src = "../assets/grasslayer.svg"
     grassLayer = new createjs.Bitmap(image).set({scaleX:5, scaleY:5});
+    grassLayer.x = (window.innerWidth/2);
+    grassLayer.y = (window.innerHeight/2);
+    grassLayer.regX += 50;
+    grassLayer.regY += 50;
+    grassLayer.rotation = Math.random() * 180;
     grassLayer.alpha = .5;
-    grassLayer.x = planet.x - planetRadius * 2.5;
-    grassLayer.y = planet.y - planetRadius * 2.5;
+
+
     grassLayer.mask = crust;
     container.addChild(grassLayer);
+
+
 }
 
 function getCenter() {
