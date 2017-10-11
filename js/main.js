@@ -11,6 +11,9 @@ var grassLayer;
 var rockLayer;
 var groundColor;
 
+var landSegments = [];
+var foliageContainer;
+
 var plusKey = false;
 var minusKey = false;
 var upKey = false;
@@ -37,11 +40,12 @@ function init() {
 
     stage = new createjs.Stage("canvas");
     container = new createjs.Container();
+    foliageContainer = new createjs.Container;
     container.regX = window.innerWidth / 2;
     container.regY = window.innerHeight / 2;
     container.x = window.innerWidth / 2;
     container.y = window.innerHeight / 2;
-
+    container.addChild(foliageContainer);
 
     stage.addChild(container);
     planet = new createjs.Shape();
@@ -51,13 +55,16 @@ function init() {
     container.addChild(planet);
     addWater();
     generateTerrain();
+    placeFoliage();
     addClouds();
 
     //addDecorLayers();
 
-    container.rotation = Math.random() * 180;
+    //container.rotation = Math.random() * 180;
     container.scaleX = .3;
     container.scaleY = .3;
+    container.setChildIndex(foliageContainer, container.numChildren - 1)
+    foliageContainer.alpha = 0;
     stage.update();
 
     createjs.Ticker.framerate = 60;
@@ -101,6 +108,55 @@ function addWater() {
     createjs.Tween.get(water2, { loop: true }).to({ scale: 1 }, 2000).to({ scale: 1.03 }, 2000);
 }
 
+function placeFoliage() {
+    var foliageCount = 2;
+    var colors = [];
+    var colorCount = 3;
+    for (var i = 0; i < colorCount; i++) {
+        colors.push(randomColor());
+    }
+    for (var i = 0; i < landSegments.length - 1; i++) {
+        for (var o = 0; o < foliageCount; o++) {
+            //var m = (landSegments[i].y - landSegments[i + 1].y) / (landSegments[i].x - landSegments[i + 1].x);
+            var bush = new createjs.Shape();
+            var num = Math.random();
+            bush.graphics.beginFill(colors[getRandomInt(0, colorCount)]);
+            var num = Math.random();
+            var x = (landSegments[i].x * (1 - num) + num * landSegments[i + 1].x);
+            var y = (landSegments[i].y * (1 - num) + landSegments[i + 1].y * num);
+            if (landSegments[i].isOcean == false) { 
+            foliageContainer.addChild(bush);
+
+            bush.x = x;
+            bush.y = y;
+            switch (getRandomInt(0, 5)) {
+                case (0):
+                    bush.graphics.drawCircle(-2, 0, 3);
+                    bush.graphics.drawCircle(2, 0, 3);
+                    bush.graphics.drawCircle(0, 2.5, 3);
+                    bush.resource = "food";
+                    bush.amount = 1;
+                    break;
+                case (1):
+                    bush.graphics.drawCircle(-3, 1, 5);
+                    bush.graphics.drawCircle(2, 1, 5);
+                    bush.graphics.drawCircle(0, 4, 5);
+                    bush.resource = "food";
+                    bush.amount = 3;
+                    break;
+            }
+            bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
+        }
+    }
+}
+}
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
 function generateTerrain() {
     var totalMountains = 0;
     var totalOceans = 0;
@@ -127,18 +183,18 @@ function generateTerrain() {
             finalOffset += mountainHeight * (Math.random() * 2);
             totalMountains++;
         }
-
+        var isOcean = false;
         //applies an ocean if needed
         if (oceanCounter > 0) {
             finalOffset -= oceanDepth;
             oceanCounter--;
             totalOceans++;
-
+            isOcean = true;
         }
-        var x = planet.x + (planetRadius + finalOffset - 15) * Math.sin(toRadians((360 / points) * i));
-        var y = planet.y + (planetRadius + finalOffset - 15) * Math.cos(toRadians((360 / points) * i));
-        crust.graphics.lineTo(x, y);
-        ground.graphics.lineTo(planet.x + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i)), planet.y + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i)));
+        var x = planet.x + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i));
+        var y = planet.y + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i));
+        ground.graphics.lineTo(x, y);
+        landSegments.push({ x: x, y: y, isOcean: isOcean });
     }
 
     ground.graphics.closePath();
@@ -158,6 +214,7 @@ function addClouds() {
     clouds.filters = [blurFilter];
     var bounds = blurFilter.getBounds();
     clouds.cache(-750 + bounds.x, -750 + bounds.y, 1500 + bounds.width, 1500 + bounds.height);
+    createjs.Tween.get(clouds, { loop: true }).to({ scale: .9 }, 5000).to({ scale: 1 }, 5000);
     container.addChild(clouds);
 }
 
@@ -223,12 +280,7 @@ function update(e) {
             else if (leftKey)
                 container.x += 5 + (container.scaleX / 5);
         }
-        // if (clouds != null) {
-        //     clouds.alpha = .3;
-        //     if (container.scaleX > 3.5) {
-        //         clouds.alpha -= (container.scaleX / 30);
-        //     }
-        // }
+
         if (!plusKey && !minusKey) {
             if (rotateLeftKey) {
                 container.rotation -= 1;
@@ -236,6 +288,12 @@ function update(e) {
                 container.rotation += 1;
             }
         }
+
+        foliageContainer.alpha = 0;
+        if(container.scaleX > 1.4){
+            foliageContainer.alpha = container.scaleX/2.5;
+        }
+
         stage.update();
     }
 }
