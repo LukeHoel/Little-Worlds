@@ -16,6 +16,8 @@ var foliageContainer;
 var treeContainer;
 var foliageOpacity = 0;
 
+var peopleContainer;
+
 var plusKey = false;
 var minusKey = false;
 var upKey = false;
@@ -44,11 +46,13 @@ function init() {
     container = new createjs.Container();
     foliageContainer = new createjs.Container;
     treeContainer = new createjs.Container;
+    peopleContainer = new createjs.Container;
     container.regX = window.innerWidth / 2;
     container.regY = window.innerHeight / 2;
     container.x = window.innerWidth / 2;
     container.y = window.innerHeight / 2;
     container.addChild(treeContainer);
+    container.addChild(peopleContainer);
     container.addChild(foliageContainer);
 
     stage.addChild(container);
@@ -60,6 +64,7 @@ function init() {
     addWater();
     generateTerrain();
     placeFoliage();
+    placePeople();
     addClouds();
 
     //addDecorLayers();
@@ -67,9 +72,13 @@ function init() {
     //container.rotation = Math.random() * 180;
     container.scaleX = .3;
     container.scaleY = .3;
-    container.setChildIndex(foliageContainer, container.numChildren - 1)
+    //container.setChildIndex(foliageContainer, container.numChildren - 1)
     foliageContainer.alpha = 0;
     treeContainer.alpha = 0;
+    peopleContainer.alpha = 0;
+
+    // ground.graphics.clear();
+    // planet.graphics.clear();
     stage.update();
 
     createjs.Ticker.framerate = 60;
@@ -127,10 +136,12 @@ function placeFoliage() {
             var num = Math.random();
             bush.graphics.beginFill(colors[getRandomInt(0, colorCount)]);
             var num = Math.random();
+            num *= .6;
+            num += .2;
             var x = (landSegments[i].x * (1 - num) + num * landSegments[i + 1].x);
             var y = (landSegments[i].y * (1 - num) + landSegments[i + 1].y * num);
             if (landSegments[i].isOcean == false) {
-                
+
 
                 bush.x = x;
                 bush.y = y;
@@ -153,7 +164,7 @@ function placeFoliage() {
                         break;
                     case (2):
                         bush.graphics.beginFill(colors[0]);
-                        bush.graphics.drawRect(-7, -12, 5, 18);
+                        bush.graphics.drawRect(-7, -9, 5, 15);
                         bush.graphics.beginFill(colors[1]);
                         bush.graphics.moveTo(-12, 5);
                         bush.graphics.lineTo(-5, 30);
@@ -165,7 +176,7 @@ function placeFoliage() {
                         break;
                     case (3):
                         bush.graphics.beginFill(colors[2]);
-                        bush.graphics.drawRect(-11, -12, 9, 23);
+                        bush.graphics.drawRect(-11, -7, 9, 18);
                         bush.graphics.beginFill(colors[3]);
                         bush.graphics.moveTo(-17, 10);
                         bush.graphics.lineTo(-6, 50);
@@ -178,6 +189,39 @@ function placeFoliage() {
                         break;
                 }
                 bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
+            }
+        }
+    }
+}
+
+function placePeople() {
+    var peopleCount = 1;
+    var chance = 2;
+    var color = randomColor();
+
+    for (var i = 0; i < landSegments.length - 1; i++) {
+        for (var o = 0; o < peopleCount; o++) {
+
+            var person = new createjs.Shape();
+            var num = Math.random();
+            person.graphics.beginFill(color);
+            var num = Math.random();
+            var x = (landSegments[i].x * (1 - num) + num * landSegments[i + 1].x);
+            var y = (landSegments[i].y * (1 - num) + landSegments[i + 1].y * num);
+
+            if (landSegments[i].isOcean == false && getRandomInt(0, chance) == 0) {
+                person.x = x;
+                person.y = y;
+                person.graphics.drawRect(0, 0, 2, 8);
+                person.graphics.drawCircle(1, 8, 3);
+                person.hunger = 10;
+                person.wood = 0;
+                peopleContainer.addChild(person);
+
+                person.rotation = 90;
+                person.rotation += Math.atan2(container.y - y, container.x - x) * 180 / Math.PI;
+                if (person.rotation < 0)
+                    person.rotation += 360;
             }
         }
     }
@@ -303,14 +347,14 @@ function update(e) {
         var movement = shiftKey ? 2 : 1;
         for (var i = 0; i < movement; i++) {
             if (downKey) {
-                container.y += -5 - (container.scaleX / 5);
+                stage.y += -5 - (container.scaleX / 5);
             }
             else if (upKey)
-                container.y += 5 + (container.scaleX / 5);
+                stage.y += 5 + (container.scaleX / 5);
             if (rightKey)
-                container.x += -5 - (container.scaleX / 5);
+                stage.x += -5 - (container.scaleX / 5);
             else if (leftKey)
-                container.x += 5 + (container.scaleX / 5);
+                stage.x += 5 + (container.scaleX / 5);
         }
 
         if (!plusKey && !minusKey) {
@@ -321,7 +365,7 @@ function update(e) {
             }
         }
 
-        treeContainer.alpha = foliageContainer.alpha = foliageOpacity;
+         peopleContainer.alpha = treeContainer.alpha = foliageContainer.alpha = foliageOpacity;
         if (container.scaleX > 1.2) {
             if (foliageOpacity < 1)
                 foliageOpacity += .1
@@ -330,7 +374,40 @@ function update(e) {
                 foliageOpacity -= .1
         }
 
+        movePeople();
+
         stage.update();
+    }
+}
+
+function movePeople() {
+    for (var i = 0; i < peopleContainer.numChildren; i++) {
+        var person = peopleContainer.getChildAt(i);
+        var fallSpeed = 1;
+        var walkSpeed = .5;
+        //directions are as if the person is on the top of the planet
+        var action = 0;
+        var walkLeft = 0;
+        var walkRight = 1;
+
+        if(!ground.hitTest(person.x, person.y)) {
+            person.x += fallSpeed * Math.cos(person.rotation);
+            person.y += fallSpeed * Math.sin(person.rotation);
+        }
+
+        switch (action) {
+            case (0):
+
+                break;
+        }
+
+        person.rotation = 90;
+        person.rotation += Math.atan2(container.y - person.y, container.x - person.x) * 180 / Math.PI;
+        while (person.rotation < 0)
+            person.rotation += 360;
+
+
+
     }
 }
 
