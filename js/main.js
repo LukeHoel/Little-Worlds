@@ -9,6 +9,7 @@ var crust;
 var clouds;
 var grassLayer;
 var rockLayer;
+var groundColor;
 
 var plusKey = false;
 var minusKey = false;
@@ -55,8 +56,8 @@ function init() {
     //addDecorLayers();
 
     container.rotation = Math.random() * 180;
-    container.scaleX = .5;
-    container.scaleY = .5;
+    container.scaleX = .3;
+    container.scaleY = .3;
     stage.update();
 
     createjs.Ticker.framerate = 60;
@@ -113,8 +114,8 @@ function generateTerrain() {
     crust = new createjs.Shape();
     ground = new createjs.Shape();
     //ground.graphics.beginFill("#705239");
-    var color1 = randomColor();
-    ground.graphics.beginFill(color1);
+    groundColor = randomColor();
+    ground.graphics.beginFill(groundColor);
     for (var i = 0; i < points; i++) {
         var offset = 70;
         var variance = 30;
@@ -149,14 +150,14 @@ function generateTerrain() {
 
 function addClouds() {
     clouds = new createjs.Shape();
-    clouds.graphics.beginFill(randomColor()).drawCircle(0, 0, planetRadius + 300);
+    clouds.graphics.beginFill(groundColor).drawCircle(0, 0, planetRadius + 300);
     clouds.alpha = .3;
     clouds.x = window.innerWidth / 2;
     clouds.y = window.innerHeight / 2;
-    var blurFilter = new createjs.BlurFilter(50, 50, 1);
+    var blurFilter = new createjs.BlurFilter(250, 250, 1);
     clouds.filters = [blurFilter];
     var bounds = blurFilter.getBounds();
-    clouds.cache(-700 + bounds.x, -700 + bounds.y, 1400 + bounds.width, 1400 + bounds.height);
+    clouds.cache(-750 + bounds.x, -750 + bounds.y, 1500 + bounds.width, 1500 + bounds.height);
     container.addChild(clouds);
 }
 
@@ -222,12 +223,12 @@ function update(e) {
             else if (leftKey)
                 container.x += 5 + (container.scaleX / 5);
         }
-        if (clouds != null) {
-            clouds.alpha = .3;
-            if (container.scaleX > 3.5) {
-                clouds.alpha -= (container.scaleX / 25);
-            }
-        }
+        // if (clouds != null) {
+        //     clouds.alpha = .3;
+        //     if (container.scaleX > 3.5) {
+        //         clouds.alpha -= (container.scaleX / 30);
+        //     }
+        // }
         if (!plusKey && !minusKey) {
             if (rotateLeftKey) {
                 container.rotation -= 1;
@@ -278,8 +279,8 @@ window.onkeyup = function (e) {
 
     switch (key) {
         case (72):
-            container.scaleX = .5;
-            container.scaleY = .5;
+            container.scaleX = .3;
+            container.scaleY = .3;
             container.x = container.regX;
             container.y = container.regY;
             break;
