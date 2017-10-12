@@ -71,8 +71,13 @@ function init() {
     //addDecorLayers();
 
     //container.rotation = Math.random() * 180;
-    container.scaleX = .3;
-    container.scaleY = .3;
+    if (!isSmallScreen()) {
+        container.scaleX = .3;
+        container.scaleY = .3;
+    } else {
+        container.scaleX = .2;
+        container.scaleY = .2;
+    }
     //container.setChildIndex(foliageContainer, container.numChildren - 1)
     foliageContainer.alpha = 0;
     treeContainer.alpha = 0;
@@ -434,7 +439,7 @@ function movePeople() {
                     peopleInfo[i].percent = 1;
                 }
                 if (peopleInfo[i].section == landSegments.length - 1) {
-                
+
                     person.y = lerp(landSegments[landSegments.length - 1].y, landSegments[peopleInfo[i].section].y, peopleInfo[i].percent);
                     person.x = lerp(landSegments[landSegments.length - 1].x, landSegments[peopleInfo[i].section].x, peopleInfo[i].percent);
                 }
@@ -451,8 +456,14 @@ function movePeople() {
         else
             person.rotation = Math.atan2(landSegments[peopleInfo[i].section + 1].y - landSegments[peopleInfo[i].section].y, landSegments[peopleInfo[i].section + 1].x - landSegments[peopleInfo[i].section].x) * 180 / Math.PI;
 
-        
+
     }
+}
+
+function isSmallScreen() {
+    if (window.innerWidth <= 992)
+        return true;
+    return false;
 }
 
 // Get the linear interpolation between two value
