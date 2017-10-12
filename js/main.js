@@ -220,7 +220,7 @@ function placePeople() {
                 person.y = y;
                 person.graphics.drawRect(0, 0, 2, 8);
                 person.graphics.drawCircle(1, 8, 3);
-                peopleInfo.push({ section: i, percent: .1 });
+                peopleInfo.push({ section: i, percent: .1, oldrotate: 0, rotatepercent: 1 });
                 peopleContainer.addChild(person);
 
                 // person.rotation = 90;
@@ -392,7 +392,7 @@ function movePeople() {
         var fallSpeed = 1;
         var walkSpeed = 0.01;
         //directions are as if the person is on the top of the planet
-        var action = 0;
+        var action = 1;
         var walkLeft = 0;
         var walkRight = 1;
 
@@ -428,6 +428,8 @@ function movePeople() {
 
                 if (peopleInfo[i].percent > 0) {
                     peopleInfo[i].percent -= walkSpeed;
+                    if (peopleInfo[i].rotatepercent < 1)
+                        peopleInfo[i].rotatepercent += .1;
                 } else {
                     if (peopleInfo[i].section > 0)
                         peopleInfo[i].section--;
@@ -437,6 +439,10 @@ function movePeople() {
                     person.x = landSegments[peopleInfo[i].section].x;
                     person.y = landSegments[peopleInfo[i].section].y;
                     peopleInfo[i].percent = 1;
+                    peopleInfo[i].rotatepercent = 0;
+                    peopleInfo[i].oldrotate = person.rotation;
+                    if (peopleInfo[i].oldrotate < 0)
+                        peopleInfo[i].oldrotate += 360;
                 }
                 if (peopleInfo[i].section == landSegments.length - 1) {
 
@@ -451,10 +457,18 @@ function movePeople() {
                 break;
 
         }
-        if (peopleInfo[i].section == landSegments.length - 1)
-            person.rotation = Math.atan2(landSegments[0].y - landSegments[peopleInfo[i].section].y, landSegments[0].x - landSegments[peopleInfo[i].section].x) * 180 / Math.PI;
-        else
-            person.rotation = Math.atan2(landSegments[peopleInfo[i].section + 1].y - landSegments[peopleInfo[i].section].y, landSegments[peopleInfo[i].section + 1].x - landSegments[peopleInfo[i].section].x) * 180 / Math.PI;
+        if (peopleInfo[i].section == landSegments.length - 1) {
+            var angle = Math.atan2(landSegments[0].y - landSegments[peopleInfo[i].section].y, landSegments[0].x - landSegments[peopleInfo[i].section].x) * 180 / Math.PI;
+            if (angle < 0)
+                angle += 360;
+            person.rotation = lerp(peopleInfo[i].oldrotate, angle, peopleInfo[i].rotatepercent);
+        }
+        else {
+            var angle = Math.atan2(landSegments[peopleInfo[i].section + 1].y - landSegments[peopleInfo[i].section].y, landSegments[peopleInfo[i].section + 1].x - landSegments[peopleInfo[i].section].x) * 180 / Math.PI;
+            if (angle < 0)
+                angle += 360;
+            person.rotation = lerp(peopleInfo[i].oldrotate, angle, peopleInfo[i].rotatepercent);
+        }
 
 
     }
