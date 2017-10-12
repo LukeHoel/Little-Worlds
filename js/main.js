@@ -390,7 +390,8 @@ function movePeople() {
         var fallSpeed = 1;
         var walkSpeed = 0.03;
         var walkSpeedOcean = 0.01;
-        var turnSpeed = 6;
+        var famished = 3;
+
         //directions are as if the person is on the top of the planet
         var action = -1;
         var nothing = -1;
@@ -405,7 +406,7 @@ function movePeople() {
             break;
         }
 
-        if (stats.food < 5) {
+        if (stats.food < famished) {
             if (foliageContainer.numChildren > 0) {
                 var closest = 0;
                 for (var o = 0; o < foliageInfo.length; o++) {
