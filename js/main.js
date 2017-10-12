@@ -17,6 +17,7 @@ var treeContainer;
 var foliageOpacity = 0;
 
 var peopleContainer;
+var peopleInfo = [];
 
 var plusKey = false;
 var minusKey = false;
@@ -196,7 +197,7 @@ function placeFoliage() {
 
 function placePeople() {
     var peopleCount = 1;
-    var chance = 2;
+    var chance = 5;
     var color = randomColor();
 
     for (var i = 0; i < landSegments.length - 1; i++) {
@@ -214,14 +215,14 @@ function placePeople() {
                 person.y = y;
                 person.graphics.drawRect(0, 0, 2, 8);
                 person.graphics.drawCircle(1, 8, 3);
-                person.hunger = 10;
-                person.wood = 0;
+                peopleInfo.push({ section: i, percent: .1 });
                 peopleContainer.addChild(person);
 
-                person.rotation = 90;
-                person.rotation += Math.atan2(container.y - y, container.x - x) * 180 / Math.PI;
-                if (person.rotation < 0)
-                    person.rotation += 360;
+                // person.rotation = 90;
+                // person.rotation += Math.atan2(container.y - y, container.x - x) * 180 / Math.PI;
+                // if (person.rotation < 0)
+                //     person.rotation += 360;
+                person.rotation = (Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI);
             }
         }
     }
@@ -365,7 +366,7 @@ function update(e) {
             }
         }
 
-         peopleContainer.alpha = treeContainer.alpha = foliageContainer.alpha = foliageOpacity;
+        peopleContainer.alpha = treeContainer.alpha = foliageContainer.alpha = foliageOpacity;
         if (container.scaleX > 1.2) {
             if (foliageOpacity < 1)
                 foliageOpacity += .1
@@ -384,31 +385,81 @@ function movePeople() {
     for (var i = 0; i < peopleContainer.numChildren; i++) {
         var person = peopleContainer.getChildAt(i);
         var fallSpeed = 1;
-        var walkSpeed = .5;
+        var walkSpeed = 0.01;
         //directions are as if the person is on the top of the planet
         var action = 0;
         var walkLeft = 0;
         var walkRight = 1;
 
-        if(!ground.hitTest(person.x, person.y)) {
-            person.x += fallSpeed * Math.cos(person.rotation);
-            person.y += fallSpeed * Math.sin(person.rotation);
-        }
+
 
         switch (action) {
-            case (0):
+            case (walkLeft):
 
+                if (peopleInfo[i].percent < 1) {
+                    peopleInfo[i].percent += walkSpeed;
+                } else {
+                    if (peopleInfo[i].section < landSegments.length - 1)
+                        peopleInfo[i].section++;
+                    else
+                        peopleInfo[i].section = 0;
+
+                    person.x = landSegments[peopleInfo[i].section].x;
+                    person.y = landSegments[peopleInfo[i].section].y;
+                    peopleInfo[i].percent = 0;
+                }
+                if (peopleInfo[i].section == landSegments.length - 1) {
+                    m = (landSegments[0].y - landSegments[peopleInfo[i].section].y) / (landSegments[0].x - landSegments[peopleInfo[i].section].x);
+                    person.y = lerp(landSegments[0].y, landSegments[peopleInfo[i].section].y, peopleInfo[i].percent);
+                    person.x = lerp(landSegments[0].x, landSegments[peopleInfo[i].section].x, peopleInfo[i].percent);
+                }
+                else {
+                    var before = person.y;
+                    person.y = lerp(landSegments[peopleInfo[i].section].y, landSegments[peopleInfo[i].section + 1].y, peopleInfo[i].percent);
+                    person.x = lerp(landSegments[peopleInfo[i].section].x, landSegments[peopleInfo[i].section + 1].x, peopleInfo[i].percent);
+                }
                 break;
+            case (walkRight):
+
+                if (peopleInfo[i].percent > 0) {
+                    peopleInfo[i].percent -= walkSpeed;
+                } else {
+                    if (peopleInfo[i].section > 0)
+                        peopleInfo[i].section--;
+                    else
+                        peopleInfo[i].section = landSegments.length - 1;
+
+                    person.x = landSegments[peopleInfo[i].section].x;
+                    person.y = landSegments[peopleInfo[i].section].y;
+                    peopleInfo[i].percent = 1;
+                }
+                if (peopleInfo[i].section == landSegments.length - 1) {
+                
+                    person.y = lerp(landSegments[landSegments.length - 1].y, landSegments[peopleInfo[i].section].y, peopleInfo[i].percent);
+                    person.x = lerp(landSegments[landSegments.length - 1].x, landSegments[peopleInfo[i].section].x, peopleInfo[i].percent);
+                }
+                else {
+
+                    person.y = lerp(landSegments[peopleInfo[i].section].y, landSegments[peopleInfo[i].section + 1].y, peopleInfo[i].percent);
+                    person.x = lerp(landSegments[peopleInfo[i].section].x, landSegments[peopleInfo[i].section + 1].x, peopleInfo[i].percent);
+                }
+                break;
+
         }
+        if (peopleInfo[i].section == landSegments.length - 1)
+            person.rotation = Math.atan2(landSegments[0].y - landSegments[peopleInfo[i].section].y, landSegments[0].x - landSegments[peopleInfo[i].section].x) * 180 / Math.PI;
+        else
+            person.rotation = Math.atan2(landSegments[peopleInfo[i].section + 1].y - landSegments[peopleInfo[i].section].y, landSegments[peopleInfo[i].section + 1].x - landSegments[peopleInfo[i].section].x) * 180 / Math.PI;
 
-        person.rotation = 90;
-        person.rotation += Math.atan2(container.y - person.y, container.x - person.x) * 180 / Math.PI;
-        while (person.rotation < 0)
-            person.rotation += 360;
-
-
-
+        
     }
+}
+
+// Get the linear interpolation between two value
+function lerp(value1, value2, amount) {
+    amount = amount < 0 ? 0 : amount;
+    amount = amount > 1 ? 1 : amount;
+    return value1 + (value2 - value1) * amount;
 }
 
 function addDecorLayers() {
