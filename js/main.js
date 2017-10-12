@@ -13,6 +13,7 @@ var groundColor;
 
 var landSegments = [];
 var foliageContainer;
+var foliageInfo = [];
 var treeContainer;
 var foliageOpacity = 0;
 
@@ -159,6 +160,7 @@ function placeFoliage() {
                         bush.resource = "food";
                         bush.amount = 1;
                         foliageContainer.addChild(bush);
+                        foliageInfo.push({ type: "food", amount: 1, section: i, index: num, x: x, y: y });
                         break;
                     case (1):
                         bush.graphics.drawCircle(-3, 1, 5);
@@ -167,6 +169,8 @@ function placeFoliage() {
                         bush.resource = "food";
                         bush.amount = 3;
                         foliageContainer.addChild(bush);
+                        foliageInfo.push({ type: "food", amount: 2, section: i, index: num, x: x, y: y });
+
                         break;
                     case (2):
                         bush.graphics.beginFill(colors[0]);
@@ -176,9 +180,8 @@ function placeFoliage() {
                         bush.graphics.lineTo(-5, 30);
                         bush.graphics.lineTo(4, 5);
                         bush.graphics.closePath();
-                        bush.resource = "wood";
-                        bush.amount = 2;
                         treeContainer.addChild(bush);
+
                         break;
                     case (3):
                         bush.graphics.beginFill(colors[2]);
@@ -188,12 +191,10 @@ function placeFoliage() {
                         bush.graphics.lineTo(-6, 50);
                         bush.graphics.lineTo(4, 10);
                         bush.graphics.closePath();
-                        bush.resource = "wood";
-                        bush.amount = 2;
-
                         treeContainer.addChild(bush);
                         break;
                 }
+
                 bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
             }
         }
@@ -220,13 +221,9 @@ function placePeople() {
                 person.y = y;
                 person.graphics.drawRect(0, 0, 2, 8);
                 person.graphics.drawCircle(1, 8, 3);
-                peopleInfo.push({ section: i, percent: .1 });
+                peopleInfo.push({ section: i, percent: .1, food: 10 });
                 peopleContainer.addChild(person);
 
-                // person.rotation = 90;
-                // person.rotation += Math.atan2(container.y - y, container.x - x) * 180 / Math.PI;
-                // if (person.rotation < 0)
-                //     person.rotation += 360;
                 person.rotation = (Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI);
             }
         }
@@ -389,14 +386,52 @@ function update(e) {
 function movePeople() {
     for (var i = 0; i < peopleContainer.numChildren; i++) {
         var person = peopleContainer.getChildAt(i);
+        var stats = peopleInfo[i];
         var fallSpeed = 1;
         var walkSpeed = 0.03;
         var walkSpeedOcean = 0.01;
         var turnSpeed = 6;
         //directions are as if the person is on the top of the planet
-        var action = 0;
+        var action = -1;
+        var nothing = -1;
         var walkLeft = 0;
         var walkRight = 1;
+        var angleFromCenter = getAngle(person, container);
+
+        stats.food -= 0.001;
+        if (stats.food <= 0) {
+            peopleInfo.splice(i, 1);
+            peopleContainer.removeChild(peopleContainer.getChildAt(i));
+            break;
+        }
+
+        if (stats.food < 5) {
+            if (foliageContainer.numChildren > 0) {
+                var closest = 0;
+                for (var o = 0; o < foliageInfo.length; o++) {
+                    var bushAngle = getAngle(foliageInfo[o], container);
+                    var closeAngle = getAngle(foliageInfo[closest], container);
+                    var dist1 = Math.abs(closeAngle - angleFromCenter);
+                    var dist2 = Math.abs(bushAngle - angleFromCenter);
+                    if (dist1 > dist2) {
+                        closest = o;
+                    }
+                }
+                var closestBush = getAngle(foliageInfo[closest], container);
+                if (Math.abs(angleFromCenter - closestBush) > .3) {
+                    if (angleFromCenter < closestBush)
+                        action = walkRight;
+                    else if (angleFromCenter > closestBush)
+                        action = walkLeft;
+                } else {
+                    stats.food += foliageInfo[closest].amount;
+                    foliageInfo.splice(closest, 1);
+                    if (foliageContainer.removeChildAt(closest))
+                        console.log("yum");
+                }
+            }
+        }
+
 
 
 
@@ -481,6 +516,16 @@ function isSmallScreen() {
     if (window.innerWidth <= 992)
         return true;
     return false;
+}
+
+function getAngle(p1, p2) {
+
+    var angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+    if (angle < 0)
+        angle += 360;
+    if (angle > 360)
+        angle -= 360;
+    return angle;
 }
 
 // Get the linear interpolation between two value
