@@ -374,10 +374,11 @@ function generateTerrain() {
     var totalOceans = 0;
     var mountainFreq = 10;//gets less likely the higher this gets
     var mountainHeight = 20;
-    var oceanFreq = 15;
-    var oceanWidth = 5;
+    var oceanFreq = 30;
+    var oceanWidth = 8;
     var oceanDepth = 100;
     var oceanCounter = 0;//oceans can be multiple sides wide, so we need a counter
+    var oceanOffCounter = 0;
     var points = 100;
     crust = new createjs.Shape();
     ground = new createjs.Shape();
@@ -385,14 +386,14 @@ function generateTerrain() {
     groundColor = randomColor();
     ground.graphics.beginFill(groundColor);
 
-    var biomeWidth = 2;
+    var biomeWidth = 4;
     var widthsleft = 0;
     var biome;
     var biomes = [];
-    biomes.push({ landModifier: 30, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance : 10 });
-    biomes.push({ landModifier: 10, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1, variance : 30 });
-    biomes.push({ landModifier: 10, canTreesGrow: false, canPlantsGrow: false, buildable: false, ocean: true, variance : 10 });
-    biomes.push({ landModifier: -20, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance : 3 });
+    biomes.push({ landModifier: 30, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance: 20 });
+    biomes.push({ landModifier: 10, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1, variance: 30 });
+    biomes.push({ landModifier: 10, canTreesGrow: false, canPlantsGrow: false, buildable: false, ocean: true, variance: 10 });
+    biomes.push({ landModifier: -20, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance: 10 });
     for (var i = 0; i < points; i++) {
         widthsleft--;
         if (widthsleft <= 0) {
@@ -402,10 +403,17 @@ function generateTerrain() {
         var offset = 70;
         var variance = biome.variance;
         var finalOffset = offset + (Math.random() * variance);
-        if ((Math.random() * oceanFreq) <= 1 && oceanCounter <= 0) {
-            oceanCounter = oceanWidth;
+        if (oceanOffCounter <= 0) {
+            if ((Math.random() * oceanFreq) <= 1 && oceanCounter <= 0) {
+                oceanCounter = oceanWidth;
+                oceanOffCounter = 3;
+            }
+        } else {
+            if(oceanCounter <= 0)
+            oceanOffCounter--;
         }
-        else if ((Math.random() * mountainFreq) <= 1) {
+        if(oceanCounter > 0)
+        if ((Math.random() * mountainFreq) <= 1) {
             finalOffset += mountainHeight * (Math.random() * 2);
             totalMountains++;
         }
