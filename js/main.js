@@ -31,6 +31,8 @@ var peopleInfo = [];
 var houseContainer;
 var houseInfo = [];
 
+var starContainer;
+
 var plusKey = false;
 var minusKey = false;
 var upKey = false;
@@ -60,15 +62,18 @@ function init() {
     }
 
     stage = new createjs.Stage("canvas");
+    starStage = new createjs.Stage("canvas");
     container = new createjs.Container();
     foliageContainer = new createjs.Container;
     treeContainer = new createjs.Container;
     peopleContainer = new createjs.Container;
     houseContainer = new createjs.Container;
+    starContainer = new createjs.Container;
     container.regX = window.innerWidth / 2;
     container.regY = window.innerHeight / 2;
     container.x = window.innerWidth / 2;
     container.y = window.innerHeight / 2;
+
     container.addChild(treeContainer);
     container.addChild(houseContainer);
     container.addChild(peopleContainer);
@@ -103,6 +108,7 @@ function init() {
     houseContainer.alpha = 0;
     // ground.graphics.clear();
     // planet.graphics.clear();
+
     stage.update();
 
     createjs.Ticker.framerate = 60;
@@ -460,12 +466,15 @@ function update(e) {
             if (downKey) {
                 stage.y += -5 - (container.scaleX / 5);
             }
-            else if (upKey)
+            else if (upKey) {
                 stage.y += 5 + (container.scaleX / 5);
-            if (rightKey)
+            }
+            if (rightKey) {
                 stage.x += -5 - (container.scaleX / 5);
-            else if (leftKey)
+            }
+            else if (leftKey) {
                 stage.x += 5 + (container.scaleX / 5);
+            }
         }
 
         if (!plusKey && !minusKey) {
@@ -582,10 +591,10 @@ function movePeople() {
                     console.log("chop");
             }
         } else if (!hasHouse) {
-            if (!landSegments[stats.section].isOcean){
-                if(stats.percent < .4)
+            if (!landSegments[stats.section].isOcean) {
+                if (stats.percent < .4)
                     action = walkRight;
-                else if(stats.percent > .6)
+                else if (stats.percent > .6)
                     action = walkLeft;
                 placeHouse(person, stats);
             }
@@ -686,13 +695,13 @@ function placeHouse(person, stats) {
     house.y = person.y;
     house.rotation = person.rotation;
     house.graphics.beginFill(randomColor());
-    house.graphics.moveTo(-5, 30);
-    house.graphics.lineTo(1, 40);
-    house.graphics.lineTo(7, 30);
-    house.graphics.lineTo(0, 15);
+    house.graphics.moveTo(-5, 15);
+    house.graphics.lineTo(1, 20);
+    house.graphics.lineTo(7, 15);
+    house.graphics.lineTo(0, 5);
     house.graphics.closePath();
     house.graphics.beginFill(randomColor());
-    house.graphics.drawRect(-5, -5, 12, 35);
+    house.graphics.drawRect(-5, -5, 12, 20);
     houseContainer.addChild(house);
     houseInfo.push({ person: person, stats: stats, x: person.x, y: person.y });
 
