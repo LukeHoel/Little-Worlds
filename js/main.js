@@ -154,7 +154,7 @@ function addWater() {
 }
 
 function placeFoliage() {
-    var foliageCount = 4;
+    var foliageCount = 2;
     for (var i = 0; i < landSegments.length - 1; i++) {
         for (var o = 0; o < foliageCount; o++) {
             //var m = (landSegments[i].y - landSegments[i + 1].y) / (landSegments[i].x - landSegments[i + 1].x);
@@ -390,10 +390,10 @@ function generateTerrain() {
     var widthsleft = 0;
     var biome;
     var biomes = [];
-    biomes.push({ landModifier: 30, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance: 20 });
+    biomes.push({ landModifier: 30, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1.2, variance: 20 });
     biomes.push({ landModifier: 10, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1, variance: 30 });
     biomes.push({ landModifier: 10, canTreesGrow: false, canPlantsGrow: false, buildable: false, ocean: true, variance: 10 });
-    biomes.push({ landModifier: -20, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance: 10 });
+    biomes.push({ landModifier: -20, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1.5, variance: 10 });
     for (var i = 0; i < points; i++) {
         widthsleft--;
         if (widthsleft <= 0) {
@@ -405,7 +405,7 @@ function generateTerrain() {
         var finalOffset = offset + (Math.random() * variance);
         if (oceanOffCounter <= 0) {
             if ((Math.random() * oceanFreq) <= 1 && oceanCounter <= 0) {
-                oceanCounter = oceanWidth;
+                oceanCounter = oceanWidth + getRandomInt(0,7);
                 oceanOffCounter = 3;
             }
         } else {
