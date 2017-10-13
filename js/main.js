@@ -31,7 +31,8 @@ var peopleInfo = [];
 var houseContainer;
 var houseInfo = [];
 
-var starContainer;
+var dayTime = 0;
+
 
 var plusKey = false;
 var minusKey = false;
@@ -107,7 +108,7 @@ function init() {
     peopleContainer.alpha = 0;
     houseContainer.alpha = 0;
     // ground.graphics.clear();
-    // planet.graphics.clear();
+    planet.graphics.clear();
 
     stage.update();
 
@@ -138,8 +139,8 @@ function addWater() {
     water2.y = window.innerHeight / 2;
     var points = 10;
     for (var i = 0; i < points; i++) {
-        var x = (planetRadius + 50) * Math.sin(toRadians((360 / points) * i));
-        var y = (planetRadius + 50) * Math.cos(toRadians((360 / points) * i));
+        var x = (planetRadius + 20) * Math.sin(toRadians((360 / points) * i));
+        var y = (planetRadius + 20) * Math.cos(toRadians((360 / points) * i));
         water.graphics.lineTo(x, y);
         water2.graphics.lineTo(x, y);
     }
@@ -153,7 +154,7 @@ function addWater() {
 }
 
 function placeFoliage() {
-    var foliageCount = 2;
+    var foliageCount = 4;
     for (var i = 0; i < landSegments.length - 1; i++) {
         for (var o = 0; o < foliageCount; o++) {
             //var m = (landSegments[i].y - landSegments[i + 1].y) / (landSegments[i].x - landSegments[i + 1].x);
@@ -172,46 +173,58 @@ function placeFoliage() {
                 bush.y = y;
                 switch (getRandomInt(0, 5)) {
                     case (0):
-                        bush.graphics.drawCircle(-2, 0, 3);
-                        bush.graphics.drawCircle(2, 0, 3);
-                        bush.graphics.drawCircle(0, 2.5, 3);
-                        bush.resource = "food";
-                        bush.amount = 1;
-                        foliageContainer.addChild(bush);
-                        foliageInfo.push({ type: "food", amount: 1, section: i, index: num, x: x, y: y });
-                        break;
+                        if (landSegments[i].biome.canPlantsGrow) {
+                            bush.graphics.drawCircle(-2, 0, 3);
+                            bush.graphics.drawCircle(2, 0, 3);
+                            bush.graphics.drawCircle(0, 2.5, 3);
+                            bush.scaleX *= landSegments[i].biome.resourceModifier;
+                            bush.scaleY *= landSegments[i].biome.resourceModifier;
+                            foliageContainer.addChild(bush);
+                            foliageInfo.push({ type: "food", amount: 1 * landSegments[i].biome.resourceModifier, section: i, index: num, x: x, y: y });
+                            break;
+                        }
                     case (1):
-                        bush.graphics.drawCircle(-3, 1, 5);
-                        bush.graphics.drawCircle(2, 1, 5);
-                        bush.graphics.drawCircle(0, 4, 5);
-                        bush.resource = "food";
-                        bush.amount = 3;
-                        foliageContainer.addChild(bush);
-                        foliageInfo.push({ type: "food", amount: 2, section: i, index: num, x: x, y: y });
+                        if (landSegments[i].biome.canPlantsGrow) {
+                            bush.graphics.drawCircle(-3, 1, 5);
+                            bush.graphics.drawCircle(2, 1, 5);
+                            bush.graphics.drawCircle(0, 4, 5);
+                            bush.scaleX *= landSegments[i].biome.resourceModifier;
+                            bush.scaleY *= landSegments[i].biome.resourceModifier;
+                            foliageContainer.addChild(bush);
+                            foliageInfo.push({ type: "food", amount: 2 * landSegments[i].biome.resourceModifier, section: i, index: num, x: x, y: y });
 
-                        break;
+                            break;
+                        }
                     case (2):
-                        bush.graphics.beginFill(colors[0]);
-                        bush.graphics.drawRect(-7, -9, 5, 15);
-                        bush.graphics.beginFill(colors[1]);
-                        bush.graphics.moveTo(-12, 5);
-                        bush.graphics.lineTo(-5, 30);
-                        bush.graphics.lineTo(4, 5);
-                        bush.graphics.closePath();
-                        treeContainer.addChild(bush);
-                        treeInfo.push({ type: "wood", amount: 3, section: i, index: num, x: x, y: y });
-                        break;
+                        if (landSegments[i].biome.canTreesGrow) {
+                            bush.graphics.beginFill(colors[0]);
+                            bush.graphics.drawRect(-7, -9, 5, 15);
+                            bush.graphics.beginFill(colors[1]);
+                            bush.graphics.moveTo(-12, 5);
+                            bush.graphics.lineTo(-5, 30);
+                            bush.graphics.lineTo(4, 5);
+                            bush.graphics.closePath();
+                            bush.scaleX *= landSegments[i].biome.resourceModifier;
+                            bush.scaleY *= landSegments[i].biome.resourceModifier;
+                            treeContainer.addChild(bush);
+                            treeInfo.push({ type: "wood", amount: 3 * landSegments[i].biome.resourceModifier, section: i, index: num, x: x, y: y });
+                            break;
+                        }
                     case (3):
-                        bush.graphics.beginFill(colors[2]);
-                        bush.graphics.drawRect(-11, -7, 9, 18);
-                        bush.graphics.beginFill(colors[3]);
-                        bush.graphics.moveTo(-17, 10);
-                        bush.graphics.lineTo(-6, 50);
-                        bush.graphics.lineTo(4, 10);
-                        bush.graphics.closePath();
-                        treeContainer.addChild(bush);
-                        treeInfo.push({ type: "wood", amount: 5, section: i, index: num, x: x, y: y });
-                        break;
+                        if (landSegments[i].biome.canTreesGrow) {
+                            bush.graphics.beginFill(colors[2]);
+                            bush.graphics.drawRect(-11, -7, 9, 18);
+                            bush.graphics.beginFill(colors[3]);
+                            bush.graphics.moveTo(-17, 10);
+                            bush.graphics.lineTo(-6, 50);
+                            bush.graphics.lineTo(4, 10);
+                            bush.graphics.closePath();
+                            bush.scaleX *= landSegments[i].biome.resourceModifier;
+                            bush.scaleY *= landSegments[i].biome.resourceModifier;
+                            treeContainer.addChild(bush);
+                            treeInfo.push({ type: "wood", amount: 5 * landSegments[i].biome.resourceModifier, section: i, index: num, x: x, y: y });
+                            break;
+                        }
                 }
 
                 bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
@@ -233,38 +246,43 @@ function placeTreesOnly() {
             num += .2;
             var x = (landSegments[i].x * (1 - num) + num * landSegments[i + 1].x);
             var y = (landSegments[i].y * (1 - num) + landSegments[i + 1].y * num);
-            if (landSegments[i].isOcean == false) {
+            if (landSegments[i].biome.canTreesGrow)
+                if (landSegments[i].isOcean == false) {
 
 
-                bush.x = x;
-                bush.y = y;
-                switch (getRandomInt(0, 2)) {
-                    case (0):
-                        bush.graphics.beginFill(colors[0]);
-                        bush.graphics.drawRect(-7, -9, 5, 15);
-                        bush.graphics.beginFill(colors[1]);
-                        bush.graphics.moveTo(-12, 5);
-                        bush.graphics.lineTo(-5, 30);
-                        bush.graphics.lineTo(4, 5);
-                        bush.graphics.closePath();
-                        treeContainer.addChild(bush);
-                        treeInfo.push({ type: "wood", amount: 3, section: i, index: num, x: x, y: y });
-                        break;
-                    case (1):
-                        bush.graphics.beginFill(colors[2]);
-                        bush.graphics.drawRect(-11, -7, 9, 18);
-                        bush.graphics.beginFill(colors[3]);
-                        bush.graphics.moveTo(-17, 10);
-                        bush.graphics.lineTo(-6, 50);
-                        bush.graphics.lineTo(4, 10);
-                        bush.graphics.closePath();
-                        treeContainer.addChild(bush);
-                        treeInfo.push({ type: "wood", amount: 5, section: i, index: num, x: x, y: y });
-                        break;
+                    bush.x = x;
+                    bush.y = y;
+                    switch (getRandomInt(0, 2)) {
+                        case (0):
+                            bush.graphics.beginFill(colors[0]);
+                            bush.graphics.drawRect(-7, -9, 5, 15);
+                            bush.graphics.beginFill(colors[1]);
+                            bush.graphics.moveTo(-12, 5);
+                            bush.graphics.lineTo(-5, 30);
+                            bush.graphics.lineTo(4, 5);
+                            bush.graphics.closePath();
+                            bush.scaleX *= landSegments[i].biome.resourceModifier;
+                            bush.scaleY *= landSegments[i].biome.resourceModifier;
+                            treeContainer.addChild(bush);
+                            treeInfo.push({ type: "wood", amount: 3, section: i, index: num, x: x, y: y });
+                            break;
+                        case (1):
+                            bush.graphics.beginFill(colors[2]);
+                            bush.graphics.drawRect(-11, -7, 9, 18);
+                            bush.graphics.beginFill(colors[3]);
+                            bush.graphics.moveTo(-17, 10);
+                            bush.graphics.lineTo(-6, 50);
+                            bush.graphics.lineTo(4, 10);
+                            bush.graphics.closePath();
+                            bush.scaleX *= landSegments[i].biome.resourceModifier;
+                            bush.scaleY *= landSegments[i].biome.resourceModifier;
+                            treeContainer.addChild(bush);
+                            treeInfo.push({ type: "wood", amount: 5, section: i, index: num, x: x, y: y });
+                            break;
+                    }
+
+                    bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
                 }
-
-                bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
-            }
         }
     }
 }
@@ -282,35 +300,36 @@ function placeBushesOnly() {
             num += .2;
             var x = (landSegments[i].x * (1 - num) + num * landSegments[i + 1].x);
             var y = (landSegments[i].y * (1 - num) + landSegments[i + 1].y * num);
-            if (landSegments[i].isOcean == false) {
+            if (landSegments[i].biome.canPlantsGrow)
+                if (landSegments[i].isOcean == false) {
 
 
-                bush.x = x;
-                bush.y = y;
-                switch (getRandomInt(0, 2)) {
-                    case (0):
-                        bush.graphics.drawCircle(-2, 0, 3);
-                        bush.graphics.drawCircle(2, 0, 3);
-                        bush.graphics.drawCircle(0, 2.5, 3);
-                        bush.resource = "food";
-                        bush.amount = 1;
-                        foliageContainer.addChild(bush);
-                        foliageInfo.push({ type: "food", amount: 1, section: i, index: num, x: x, y: y });
-                        break;
-                    case (1):
-                        bush.graphics.drawCircle(-3, 1, 5);
-                        bush.graphics.drawCircle(2, 1, 5);
-                        bush.graphics.drawCircle(0, 4, 5);
-                        bush.resource = "food";
-                        bush.amount = 3;
-                        foliageContainer.addChild(bush);
-                        foliageInfo.push({ type: "food", amount: 2, section: i, index: num, x: x, y: y });
+                    bush.x = x;
+                    bush.y = y;
+                    switch (getRandomInt(0, 2)) {
+                        case (0):
+                            bush.graphics.drawCircle(-2, 0, 3);
+                            bush.graphics.drawCircle(2, 0, 3);
+                            bush.graphics.drawCircle(0, 2.5, 3);
+                            bush.scaleX *= landSegments[i].biome.resourceModifier;
+                            bush.scaleY *= landSegments[i].biome.resourceModifier;
+                            foliageContainer.addChild(bush);
+                            foliageInfo.push({ type: "food", amount: 1, section: i, index: num, x: x, y: y });
+                            break;
+                        case (1):
+                            bush.graphics.drawCircle(-3, 1, 5);
+                            bush.graphics.drawCircle(2, 1, 5);
+                            bush.graphics.drawCircle(0, 4, 5);
+                            bush.scaleX *= landSegments[i].biome.resourceModifier;
+                            bush.scaleY *= landSegments[i].biome.resourceModifier;
+                            foliageContainer.addChild(bush);
+                            foliageInfo.push({ type: "food", amount: 2, section: i, index: num, x: x, y: y });
 
-                        break;
+                            break;
+                    }
+
+                    bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
                 }
-
-                bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
-            }
         }
     }
 }
@@ -354,10 +373,10 @@ function generateTerrain() {
     var totalMountains = 0;
     var totalOceans = 0;
     var mountainFreq = 10;//gets less likely the higher this gets
-    var mountainHeight = 50;
-    var oceanFreq = 10;
-    var oceanWidth = 3;
-    var oceanDepth = 60;
+    var mountainHeight = 20;
+    var oceanFreq = 15;
+    var oceanWidth = 5;
+    var oceanDepth = 100;
     var oceanCounter = 0;//oceans can be multiple sides wide, so we need a counter
     var points = 100;
     crust = new createjs.Shape();
@@ -365,9 +384,23 @@ function generateTerrain() {
     //ground.graphics.beginFill("#705239");
     groundColor = randomColor();
     ground.graphics.beginFill(groundColor);
+
+    var biomeWidth = 2;
+    var widthsleft = 0;
+    var biome;
+    var biomes = [];
+    biomes.push({ landModifier: 30, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance : 10 });
+    biomes.push({ landModifier: 10, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1, variance : 30 });
+    biomes.push({ landModifier: 10, canTreesGrow: false, canPlantsGrow: false, buildable: false, ocean: true, variance : 10 });
+    biomes.push({ landModifier: -20, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance : 0 });
     for (var i = 0; i < points; i++) {
+        widthsleft--;
+        if (widthsleft <= 0) {
+            biome = biomes[getRandomInt(0, biomes.length)];
+            widthsleft = biomeWidth;
+        }
         var offset = 70;
-        var variance = 30;
+        var variance = biome.variance;
         var finalOffset = offset + (Math.random() * variance);
         if ((Math.random() * oceanFreq) <= 1 && oceanCounter <= 0) {
             oceanCounter = oceanWidth;
@@ -384,10 +417,12 @@ function generateTerrain() {
             totalOceans++;
             isOcean = true;
         }
+        if (!isOcean)
+            finalOffset += biome.landModifier;
         var x = planet.x + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i));
         var y = planet.y + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i));
         ground.graphics.lineTo(x, y);
-        landSegments.push({ x: x, y: y, isOcean: isOcean });
+        landSegments.push({ x: x, y: y, isOcean: isOcean, biome: biome });
     }
 
     ground.graphics.closePath();
@@ -591,7 +626,7 @@ function movePeople() {
                     console.log("chop");
             }
         } else if (!hasHouse) {
-            if (!landSegments[stats.section].isOcean) {
+            if (!landSegments[stats.section].isOcean && landSegments[stats.section].biome.buildable) {
                 if (stats.percent < .4)
                     action = walkRight;
                 else if (stats.percent > .6)
