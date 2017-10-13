@@ -392,7 +392,7 @@ function generateTerrain() {
     biomes.push({ landModifier: 30, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance : 10 });
     biomes.push({ landModifier: 10, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1, variance : 30 });
     biomes.push({ landModifier: 10, canTreesGrow: false, canPlantsGrow: false, buildable: false, ocean: true, variance : 10 });
-    biomes.push({ landModifier: -20, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance : 0 });
+    biomes.push({ landModifier: -20, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 2, variance : 3 });
     for (var i = 0; i < points; i++) {
         widthsleft--;
         if (widthsleft <= 0) {
