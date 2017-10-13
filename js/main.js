@@ -100,7 +100,7 @@ function init() {
     foliageContainer.alpha = 0;
     treeContainer.alpha = 0;
     peopleContainer.alpha = 0;
-
+    houseContainer.alpha = 0;
     // ground.graphics.clear();
     // planet.graphics.clear();
     stage.update();
@@ -476,7 +476,7 @@ function update(e) {
             }
         }
 
-        peopleContainer.alpha = treeContainer.alpha = foliageContainer.alpha = foliageOpacity;
+        houseContainer.alpha = peopleContainer.alpha = treeContainer.alpha = foliageContainer.alpha = foliageOpacity;
         if (container.scaleX > 1.2) {
             if (foliageOpacity < 1)
                 foliageOpacity += .1
@@ -583,9 +583,9 @@ function movePeople() {
             }
         } else if (!hasHouse) {
             if (!landSegments[stats.section].isOcean){
-                if(stats.percent < .3)
+                if(stats.percent < .4)
                     action = walkRight;
-                else if(stats.percent > .7)
+                else if(stats.percent > .6)
                     action = walkLeft;
                 placeHouse(person, stats);
             }
@@ -686,13 +686,13 @@ function placeHouse(person, stats) {
     house.y = person.y;
     house.rotation = person.rotation;
     house.graphics.beginFill(randomColor());
-    house.graphics.moveTo(-15, 30);
-    house.graphics.lineTo(0, 40);
-    house.graphics.lineTo(15, 30);
+    house.graphics.moveTo(-5, 30);
+    house.graphics.lineTo(1, 40);
+    house.graphics.lineTo(7, 30);
     house.graphics.lineTo(0, 15);
     house.graphics.closePath();
     house.graphics.beginFill(randomColor());
-    house.graphics.drawRect(-15, -5, 30, 35);
+    house.graphics.drawRect(-5, -5, 12, 35);
     houseContainer.addChild(house);
     houseInfo.push({ person: person, stats: stats, x: person.x, y: person.y });
 
