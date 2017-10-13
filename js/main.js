@@ -28,6 +28,9 @@ var timer = plantTimer;
 var peopleContainer;
 var peopleInfo = [];
 
+var houseContainer;
+var houseInfo = [];
+
 var plusKey = false;
 var minusKey = false;
 var upKey = false;
@@ -61,11 +64,13 @@ function init() {
     foliageContainer = new createjs.Container;
     treeContainer = new createjs.Container;
     peopleContainer = new createjs.Container;
+    houseContainer = new createjs.Container;
     container.regX = window.innerWidth / 2;
     container.regY = window.innerHeight / 2;
     container.x = window.innerWidth / 2;
     container.y = window.innerHeight / 2;
     container.addChild(treeContainer);
+    container.addChild(houseContainer);
     container.addChild(peopleContainer);
     container.addChild(foliageContainer);
 
@@ -481,7 +486,7 @@ function update(e) {
         }
 
         movePeople();
-        timer --;
+        timer--;
         if (timer <= 0) {
             if (foliageContainer.numChildren < minimumPlants) {
                 placeBushesOnly();
@@ -513,11 +518,21 @@ function movePeople() {
         var angleFromCenter = getAngle(person, container);
 
         stats.food -= 0.001;
+        var hasHouse = false;
+        var house;
+        for (var o = 0; o < houseInfo.length; o++) {
+            if (houseInfo[o].person == person) {
+                hasHouse = true;
+                house = houseInfo[o];
+            }
+        }
+
         if (stats.food <= 0) {
             peopleInfo.splice(i, 1);
             peopleContainer.removeChild(peopleContainer.getChildAt(i));
             break;
         }
+
 
         if (stats.food < famished && foliageContainer.numChildren > 0) {
             var closest = 0;
@@ -565,6 +580,24 @@ function movePeople() {
                 treeInfo.splice(closest, 1);
                 if (treeContainer.removeChildAt(closest))
                     console.log("chop");
+            }
+        } else if (!hasHouse) {
+            if (!landSegments[stats.section].isOcean){
+                if(stats.percent < .3)
+                    action = walkRight;
+                else if(stats.percent > .7)
+                    action = walkLeft;
+                placeHouse(person, stats);
+            }
+            else
+                action = walkRight;
+        } else {
+            var houseAngle = getAngle(house, container);
+            if (Math.abs(angleFromCenter - houseAngle) > .2) {
+                if (angleFromCenter < houseAngle)
+                    action = walkRight;
+                else if (angleFromCenter > houseAngle)
+                    action = walkLeft;
             }
         }
 
@@ -645,6 +678,24 @@ function movePeople() {
 
 
     }
+}
+
+function placeHouse(person, stats) {
+    var house = new createjs.Shape();
+    house.x = person.x;
+    house.y = person.y;
+    house.rotation = person.rotation;
+    house.graphics.beginFill(randomColor());
+    house.graphics.moveTo(-15, 30);
+    house.graphics.lineTo(0, 40);
+    house.graphics.lineTo(15, 30);
+    house.graphics.lineTo(0, 15);
+    house.graphics.closePath();
+    house.graphics.beginFill(randomColor());
+    house.graphics.drawRect(-15, -5, 30, 35);
+    houseContainer.addChild(house);
+    houseInfo.push({ person: person, stats: stats, x: person.x, y: person.y });
+
 }
 
 function isSmallScreen() {
