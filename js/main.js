@@ -11,11 +11,19 @@ var grassLayer;
 var rockLayer;
 var groundColor;
 
+var colors = [];
+var colorCount = 4;
+
 var landSegments = [];
 var foliageContainer;
 var foliageInfo = [];
 var treeContainer;
+var treeInfo = [];
 var foliageOpacity = 0;
+
+var minimumPlants = 40;
+var plantTimer = 60 * 20;
+var timer = plantTimer;
 
 var peopleContainer;
 var peopleInfo = [];
@@ -43,6 +51,10 @@ function init() {
     canvas.height = window.innerHeight;
 
     window.addEventListener('resize', resize, false);
+
+    for (var i = 0; i < colorCount; i++) {
+        colors.push(randomColor());
+    }
 
     stage = new createjs.Stage("canvas");
     container = new createjs.Container();
@@ -131,11 +143,6 @@ function addWater() {
 
 function placeFoliage() {
     var foliageCount = 2;
-    var colors = [];
-    var colorCount = 4;
-    for (var i = 0; i < colorCount; i++) {
-        colors.push(randomColor());
-    }
     for (var i = 0; i < landSegments.length - 1; i++) {
         for (var o = 0; o < foliageCount; o++) {
             //var m = (landSegments[i].y - landSegments[i + 1].y) / (landSegments[i].x - landSegments[i + 1].x);
@@ -181,7 +188,7 @@ function placeFoliage() {
                         bush.graphics.lineTo(4, 5);
                         bush.graphics.closePath();
                         treeContainer.addChild(bush);
-
+                        treeInfo.push({ type: "wood", amount: 3, section: i, index: num, x: x, y: y });
                         break;
                     case (3):
                         bush.graphics.beginFill(colors[2]);
@@ -192,6 +199,102 @@ function placeFoliage() {
                         bush.graphics.lineTo(4, 10);
                         bush.graphics.closePath();
                         treeContainer.addChild(bush);
+                        treeInfo.push({ type: "wood", amount: 5, section: i, index: num, x: x, y: y });
+                        break;
+                }
+
+                bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
+            }
+        }
+    }
+}
+
+function placeTreesOnly() {
+    var foliageCount = 1;
+    for (var i = 0; i < landSegments.length - 1; i++) {
+        for (var o = 0; o < foliageCount; o++) {
+            //var m = (landSegments[i].y - landSegments[i + 1].y) / (landSegments[i].x - landSegments[i + 1].x);
+            var bush = new createjs.Shape();
+            var num = Math.random();
+            bush.graphics.beginFill(colors[getRandomInt(0, colorCount)]);
+            var num = Math.random();
+            num *= .6;
+            num += .2;
+            var x = (landSegments[i].x * (1 - num) + num * landSegments[i + 1].x);
+            var y = (landSegments[i].y * (1 - num) + landSegments[i + 1].y * num);
+            if (landSegments[i].isOcean == false) {
+
+
+                bush.x = x;
+                bush.y = y;
+                switch (getRandomInt(0, 2)) {
+                    case (0):
+                        bush.graphics.beginFill(colors[0]);
+                        bush.graphics.drawRect(-7, -9, 5, 15);
+                        bush.graphics.beginFill(colors[1]);
+                        bush.graphics.moveTo(-12, 5);
+                        bush.graphics.lineTo(-5, 30);
+                        bush.graphics.lineTo(4, 5);
+                        bush.graphics.closePath();
+                        treeContainer.addChild(bush);
+                        treeInfo.push({ type: "wood", amount: 3, section: i, index: num, x: x, y: y });
+                        break;
+                    case (1):
+                        bush.graphics.beginFill(colors[2]);
+                        bush.graphics.drawRect(-11, -7, 9, 18);
+                        bush.graphics.beginFill(colors[3]);
+                        bush.graphics.moveTo(-17, 10);
+                        bush.graphics.lineTo(-6, 50);
+                        bush.graphics.lineTo(4, 10);
+                        bush.graphics.closePath();
+                        treeContainer.addChild(bush);
+                        treeInfo.push({ type: "wood", amount: 5, section: i, index: num, x: x, y: y });
+                        break;
+                }
+
+                bush.rotation = Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI;
+            }
+        }
+    }
+}
+
+function placeBushesOnly() {
+    var foliageCount = 1;
+    for (var i = 0; i < landSegments.length - 1; i++) {
+        for (var o = 0; o < foliageCount; o++) {
+            //var m = (landSegments[i].y - landSegments[i + 1].y) / (landSegments[i].x - landSegments[i + 1].x);
+            var bush = new createjs.Shape();
+            var num = Math.random();
+            bush.graphics.beginFill(colors[getRandomInt(0, colorCount)]);
+            var num = Math.random();
+            num *= .6;
+            num += .2;
+            var x = (landSegments[i].x * (1 - num) + num * landSegments[i + 1].x);
+            var y = (landSegments[i].y * (1 - num) + landSegments[i + 1].y * num);
+            if (landSegments[i].isOcean == false) {
+
+
+                bush.x = x;
+                bush.y = y;
+                switch (getRandomInt(0, 2)) {
+                    case (0):
+                        bush.graphics.drawCircle(-2, 0, 3);
+                        bush.graphics.drawCircle(2, 0, 3);
+                        bush.graphics.drawCircle(0, 2.5, 3);
+                        bush.resource = "food";
+                        bush.amount = 1;
+                        foliageContainer.addChild(bush);
+                        foliageInfo.push({ type: "food", amount: 1, section: i, index: num, x: x, y: y });
+                        break;
+                    case (1):
+                        bush.graphics.drawCircle(-3, 1, 5);
+                        bush.graphics.drawCircle(2, 1, 5);
+                        bush.graphics.drawCircle(0, 4, 5);
+                        bush.resource = "food";
+                        bush.amount = 3;
+                        foliageContainer.addChild(bush);
+                        foliageInfo.push({ type: "food", amount: 2, section: i, index: num, x: x, y: y });
+
                         break;
                 }
 
@@ -221,7 +324,7 @@ function placePeople() {
                 person.y = y;
                 person.graphics.drawRect(0, 0, 2, 8);
                 person.graphics.drawCircle(1, 8, 3);
-                peopleInfo.push({ section: i, percent: .1, food: 10 });
+                peopleInfo.push({ section: i, percent: .1, food: 2, wood: 0 });
                 peopleContainer.addChild(person);
 
                 person.rotation = (Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI);
@@ -378,7 +481,16 @@ function update(e) {
         }
 
         movePeople();
-
+        timer --;
+        if (timer <= 0) {
+            if (foliageContainer.numChildren < minimumPlants) {
+                placeBushesOnly();
+            }
+            if (treeContainer.numChildren < minimumPlants) {
+                placeTreesOnly();
+            }
+            timer = plantTimer;
+        }
         stage.update();
     }
 }
@@ -391,6 +503,7 @@ function movePeople() {
         var walkSpeed = 0.03;
         var walkSpeedOcean = 0.01;
         var famished = 3;
+        var woodNeeded = 10;
 
         //directions are as if the person is on the top of the planet
         var action = -1;
@@ -406,33 +519,54 @@ function movePeople() {
             break;
         }
 
-        if (stats.food < famished) {
-            if (foliageContainer.numChildren > 0) {
-                var closest = 0;
-                for (var o = 0; o < foliageInfo.length; o++) {
-                    var bushAngle = getAngle(foliageInfo[o], container);
-                    var closeAngle = getAngle(foliageInfo[closest], container);
-                    var dist1 = Math.abs(closeAngle - angleFromCenter);
-                    var dist2 = Math.abs(bushAngle - angleFromCenter);
-                    if (dist1 > dist2) {
-                        closest = o;
-                    }
-                }
-                var closestBush = getAngle(foliageInfo[closest], container);
-                if (Math.abs(angleFromCenter - closestBush) > .3) {
-                    if (angleFromCenter < closestBush)
-                        action = walkRight;
-                    else if (angleFromCenter > closestBush)
-                        action = walkLeft;
-                } else {
-                    stats.food += foliageInfo[closest].amount;
-                    foliageInfo.splice(closest, 1);
-                    if (foliageContainer.removeChildAt(closest))
-                        console.log("yum");
+        if (stats.food < famished && foliageContainer.numChildren > 0) {
+            var closest = 0;
+            for (var o = 0; o < foliageInfo.length; o++) {
+                var bushAngle = getAngle(foliageInfo[o], container);
+                var closeAngle = getAngle(foliageInfo[closest], container);
+                var dist1 = Math.abs(closeAngle - angleFromCenter);
+                var dist2 = Math.abs(bushAngle - angleFromCenter);
+                if (dist1 > dist2) {
+                    closest = o;
                 }
             }
+            var closestBush = getAngle(foliageInfo[closest], container);
+            if (Math.abs(angleFromCenter - closestBush) > .3) {
+                if (angleFromCenter < closestBush)
+                    action = walkRight;
+                else if (angleFromCenter > closestBush)
+                    action = walkLeft;
+            } else {
+                stats.food += foliageInfo[closest].amount;
+                foliageInfo.splice(closest, 1);
+                if (foliageContainer.removeChildAt(closest))
+                    console.log("yum");
+            }
         }
-
+        else if (stats.wood < woodNeeded && treeContainer.numChildren > 0) {
+            var closest = 0;
+            for (var o = 0; o < treeInfo.length; o++) {
+                var bushAngle = getAngle(treeInfo[o], container);
+                var closeAngle = getAngle(treeInfo[closest], container);
+                var dist1 = Math.abs(closeAngle - angleFromCenter);
+                var dist2 = Math.abs(bushAngle - angleFromCenter);
+                if (dist1 > dist2) {
+                    closest = o;
+                }
+            }
+            var closestBush = getAngle(treeInfo[closest], container);
+            if (Math.abs(angleFromCenter - closestBush) > .3) {
+                if (angleFromCenter < closestBush)
+                    action = walkRight;
+                else if (angleFromCenter > closestBush)
+                    action = walkLeft;
+            } else {
+                stats.wood += treeInfo[closest].amount;
+                treeInfo.splice(closest, 1);
+                if (treeContainer.removeChildAt(closest))
+                    console.log("chop");
+            }
+        }
 
 
 
