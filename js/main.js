@@ -31,9 +31,6 @@ var peopleInfo = [];
 var houseContainer;
 var houseInfo = [];
 
-var dayTime = 0;
-
-
 var plusKey = false;
 var minusKey = false;
 var upKey = false;
@@ -69,7 +66,6 @@ function init() {
     treeContainer = new createjs.Container;
     peopleContainer = new createjs.Container;
     houseContainer = new createjs.Container;
-    starContainer = new createjs.Container;
     container.regX = window.innerWidth / 2;
     container.regY = window.innerHeight / 2;
     container.x = window.innerWidth / 2;
@@ -82,7 +78,6 @@ function init() {
 
     stage.addChild(container);
     planet = new createjs.Shape();
-    planet.graphics.beginFill("DeepSkyBlue").drawCircle(0, 0, planetRadius);
     planet.x = window.innerWidth / 2;
     planet.y = window.innerHeight / 2;
     container.addChild(planet);
@@ -108,7 +103,6 @@ function init() {
     peopleContainer.alpha = 0;
     houseContainer.alpha = 0;
     // ground.graphics.clear();
-    planet.graphics.clear();
 
     stage.update();
 
@@ -354,7 +348,7 @@ function placePeople() {
                 person.y = y;
                 person.graphics.drawRect(0, 0, 2, 8);
                 person.graphics.drawCircle(1, 8, 3);
-                peopleInfo.push({ section: i, percent: .1, food: 2, wood: 0 });
+                peopleInfo.push({ section: i, percent: .1, food: 2, wood: 0, idleDirection: 0, idleTimer: 0 });
                 peopleContainer.addChild(person);
 
                 person.rotation = (Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI);
@@ -405,18 +399,18 @@ function generateTerrain() {
         var finalOffset = offset + (Math.random() * variance);
         if (oceanOffCounter <= 0) {
             if ((Math.random() * oceanFreq) <= 1 && oceanCounter <= 0) {
-                oceanCounter = oceanWidth + getRandomInt(0,7);
+                oceanCounter = oceanWidth + getRandomInt(0, 7);
                 oceanOffCounter = 3;
             }
         } else {
-            if(oceanCounter <= 0)
-            oceanOffCounter--;
+            if (oceanCounter <= 0)
+                oceanOffCounter--;
         }
-        if(oceanCounter > 0)
-        if ((Math.random() * mountainFreq) <= 1) {
-            finalOffset += mountainHeight * (Math.random() * 2);
-            totalMountains++;
-        }
+        if (oceanCounter > 0)
+            if ((Math.random() * mountainFreq) <= 1) {
+                finalOffset += mountainHeight * (Math.random() * 2);
+                totalMountains++;
+            }
         var isOcean = false;
         //applies an ocean if needed
         if (oceanCounter > 0) {
@@ -578,13 +572,19 @@ function movePeople() {
                 house = houseInfo[o];
             }
         }
-
+        if (hasHouse) {
+            house.health -= 0.001;
+            if (house.health <= 0) {
+                houseInfo.splice(i, 1);
+                houseContainer.removeChild(house);
+                house = null;
+            }
+        }
         if (stats.food <= 0) {
             peopleInfo.splice(i, 1);
             peopleContainer.removeChild(peopleContainer.getChildAt(i));
             break;
         }
-
 
         if (stats.food < famished && foliageContainer.numChildren > 0) {
             var closest = 0;
@@ -606,8 +606,7 @@ function movePeople() {
             } else {
                 stats.food += foliageInfo[closest].amount;
                 foliageInfo.splice(closest, 1);
-                if (foliageContainer.removeChildAt(closest))
-                    console.log("yum");
+                foliageContainer.removeChildAt(closest);
             }
         }
         else if (stats.wood < woodNeeded && treeContainer.numChildren > 0) {
@@ -630,8 +629,7 @@ function movePeople() {
             } else {
                 stats.wood += treeInfo[closest].amount;
                 treeInfo.splice(closest, 1);
-                if (treeContainer.removeChildAt(closest))
-                    console.log("chop");
+                treeContainer.removeChildAt(closest);
             }
         } else if (!hasHouse) {
             if (!landSegments[stats.section].isOcean && landSegments[stats.section].biome.buildable) {
@@ -644,12 +642,26 @@ function movePeople() {
             else
                 action = walkRight;
         } else {
+
             var houseAngle = getAngle(house, container);
-            if (Math.abs(angleFromCenter - houseAngle) > .2) {
-                if (angleFromCenter < houseAngle)
-                    action = walkRight;
-                else if (angleFromCenter > houseAngle)
-                    action = walkLeft;
+            if (house.health < 10) {
+                if (Math.abs(angleFromCenter - houseAngle) > .2) {
+                    if (angleFromCenter < houseAngle)
+                        action = walkRight;
+                    else if (angleFromCenter > houseAngle)
+                        action = walkLeft;
+                } else {
+
+                    house.health += stats.wood;
+                }
+            } else {
+                //if there is nothing else to do...
+                stats.idleTimer--;
+                if (stats.idleTimer <= 0) {
+                    stats.idleTimer = (2 + getRandomInt(0, 3)) * 60;
+                    stats.idleDirection = getRandomInt(0, 2);
+                }
+                action = stats.idleDirection;
             }
         }
 
@@ -668,8 +680,6 @@ function movePeople() {
                         peopleInfo[i].section++;
                     else {
                         peopleInfo[i].section = 0;
-
-                        console.log("hit the bottom");
                     }
 
 
@@ -746,7 +756,7 @@ function placeHouse(person, stats) {
     house.graphics.beginFill(randomColor());
     house.graphics.drawRect(-5, -5, 12, 20);
     houseContainer.addChild(house);
-    houseInfo.push({ person: person, stats: stats, x: person.x, y: person.y });
+    houseInfo.push({ person: person, stats: stats, x: person.x, y: person.y, health: 10 });
 
 }
 

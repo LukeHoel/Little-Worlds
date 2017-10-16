@@ -18,8 +18,38 @@
 </head>
 
 <body>
+
     <body onload="init();">
-        <canvas id="canvas" style="z-index:1; "></canvas>
+        <div id="custom-bootstrap-menu" class="navbar navbar-default" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand">Brand</a>
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-menubuilder">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse navbar-menubuilder">
+                    <ul class="nav navbar-nav navbar-left">
+                        <li>
+                            <a>Home</a>
+                        </li>
+                        <li>
+                            <a>Products</a>
+                        </li>
+                        <li>
+                            <a>About Us</a>
+                        </li>
+                        <li>
+                            <a>Contact Us</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <canvas id="canvas" style="z-index:-1;position:absolute;top:0;"></canvas>
     </body>
 </body>
 
