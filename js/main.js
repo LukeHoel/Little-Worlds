@@ -111,6 +111,55 @@ function init() {
         update(e);
     });
 
+    document.getElementById("name").innerText = getName();
+}
+
+function getName(){
+    var name = "";
+    var namesPartA = [
+        "Zog",
+        "Dom",
+        "Ag",
+        "Gon",
+        "Agg",
+        "Zoo",
+        "Nu",
+        "Ksi",
+        "Pi",
+        "Tau"       
+    ];
+    var namesPartB = [
+        "oid",
+        "son",
+        "ston",
+        "nog",
+        "ga",
+        "gon",
+        "nu",
+        "ski",
+        "pi"      
+    ];
+    var greekNums = [
+        "Alpha",
+        "Beta",
+        "Gamma",
+        "Delta",
+        "Epsilon",
+        "Zeta",
+        "Eta",
+        "Theta",
+        "Iota",
+        "Kappa",
+        "Lambda",
+        "Sigma",
+        "Upsilon",
+        "Omega"
+    ];
+
+    name += namesPartA[getRandomInt(0, namesPartA.length)];
+    name += namesPartB[getRandomInt(0, namesPartB.length)];
+    name += " - " + greekNums[getRandomInt(0, greekNums.length)];
+    return name;
 }
 
 function addWater() {
@@ -133,8 +182,8 @@ function addWater() {
     water2.y = window.innerHeight / 2;
     var points = 10;
     for (var i = 0; i < points; i++) {
-        var x = (planetRadius + 20) * Math.sin(toRadians((360 / points) * i));
-        var y = (planetRadius + 20) * Math.cos(toRadians((360 / points) * i));
+        var x = (planetRadius + 35) * Math.sin(toRadians((360 / points) * i));
+        var y = (planetRadius + 35) * Math.cos(toRadians((360 / points) * i));
         water.graphics.lineTo(x, y);
         water2.graphics.lineTo(x, y);
     }
@@ -370,7 +419,7 @@ function generateTerrain() {
     var mountainHeight = 20;
     var oceanFreq = 30;
     var oceanWidth = 8;
-    var oceanDepth = 100;
+    var oceanDepth = 80;
     var oceanCounter = 0;//oceans can be multiple sides wide, so we need a counter
     var oceanOffCounter = 0;
     var points = 100;
@@ -387,7 +436,8 @@ function generateTerrain() {
     biomes.push({ landModifier: 30, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1.2, variance: 20 });
     biomes.push({ landModifier: 10, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1, variance: 30 });
     biomes.push({ landModifier: 10, canTreesGrow: false, canPlantsGrow: false, buildable: false, ocean: true, variance: 10 });
-    biomes.push({ landModifier: -20, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1.5, variance: 10 });
+    biomes.push({ landModifier: -20, canTreesGrow: true, canPlantsGrow: true, buildable: true, ocean: false, resourceModifier: 1.5, variance: 30 });
+    biomes.push({ landModifier: 10, canTreesGrow: false, canPlantsGrow: false, buildable: true, ocean: false, resourceModifier: 1.5, variance: 60 });
     for (var i = 0; i < points; i++) {
         widthsleft--;
         if (widthsleft <= 0) {
@@ -418,6 +468,14 @@ function generateTerrain() {
             oceanCounter--;
             totalOceans++;
             isOcean = true;
+        }
+        if (landSegments.length > 1) {
+            if (isOcean && !landSegments[landSegments.length - 1].isOcean) {
+                finalOffset += (oceanDepth / 2);
+            }
+            if (!isOcean && landSegments[landSegments.length - 1].isOcean) {
+                finalOffset -= (oceanDepth / 2);
+            }
         }
         if (!isOcean)
             finalOffset += biome.landModifier;
