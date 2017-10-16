@@ -114,7 +114,7 @@ function init() {
     //document.getElementById("name").innerText = getName();
 }
 
-function getName(){
+function getName() {
     var name = "";
     var namesPartA = [
         "Zog",
@@ -126,7 +126,7 @@ function getName(){
         "Nu",
         "Ksi",
         "Pi",
-        "Tau"       
+        "Tau"
     ];
     var namesPartB = [
         "oid",
@@ -137,7 +137,7 @@ function getName(){
         "gon",
         "nu",
         "ski",
-        "pi"      
+        "pi"
     ];
     var greekNums = [
         "Alpha",
@@ -397,7 +397,7 @@ function placePeople() {
                 person.y = y;
                 person.graphics.drawRect(0, 0, 2, 8);
                 person.graphics.drawCircle(1, 8, 3);
-                peopleInfo.push({ section: i, percent: .1, food: 2, wood: 0, idleDirection: 0, idleTimer: 0 });
+                peopleInfo.push({ section: i, percent: Math.random(), food: 6, wood: 0, idleDirection: 0, idleTimer: 0 });
                 peopleContainer.addChild(person);
 
                 person.rotation = (Math.atan2(landSegments[i + 1].y - landSegments[i].y, landSegments[i + 1].x - landSegments[i].x) * 180 / Math.PI);
@@ -520,7 +520,7 @@ function update(e) {
     //run everything in here!
     if (!e.paused) {
 
-        if (plusKey && container.scaleX < 20) {
+        if (plusKey && container.scaleX < 7.5) {
 
             var holder = container.rotation;
             container.rotation = 0;
@@ -572,12 +572,10 @@ function update(e) {
             }
         }
 
-        if (!plusKey && !minusKey) {
-            if (rotateLeftKey) {
-                container.rotation -= 1;
-            } else if (rotateRightKey) {
-                container.rotation += 1;
-            }
+        if (rotateLeftKey) {
+            container.rotation -= 1;
+        } else if (rotateRightKey) {
+            container.rotation += 1;
         }
 
         houseContainer.alpha = peopleContainer.alpha = treeContainer.alpha = foliageContainer.alpha = foliageOpacity;
@@ -814,7 +812,7 @@ function placeHouse(person, stats) {
     house.graphics.beginFill(randomColor());
     house.graphics.drawRect(-5, -5, 12, 20);
     houseContainer.addChild(house);
-    houseInfo.push({ person: person, stats: stats, x: person.x, y: person.y, health: 10 });
+    houseInfo.push({ person: person, stats: stats, x: person.x, y: person.y, health: 10 + getRandomInt(5,10) });
 
 }
 
