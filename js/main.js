@@ -111,7 +111,7 @@ function init() {
         update(e);
     });
 
-    document.getElementById("name").innerText = getName();
+    //document.getElementById("name").innerText = getName();
 }
 
 function getName(){
@@ -158,7 +158,7 @@ function getName(){
 
     name += namesPartA[getRandomInt(0, namesPartA.length)];
     name += namesPartB[getRandomInt(0, namesPartB.length)];
-    name += " - " + greekNums[getRandomInt(0, greekNums.length)];
+    name += " " + greekNums[getRandomInt(0, greekNums.length)];
     return name;
 }
 
