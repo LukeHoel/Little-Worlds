@@ -21,7 +21,7 @@
 <body>
 
     <body onload="init();">
-        <div id="custom-bootstrap-menu" class="navbar navbar-default" role="navigation">
+        <div id="custom-bootstrap-menu" class="navbar navbar-default" role="navigation" style="margin-bottom:0px;">
             <div class="container-fluid">
                 <div class="navbar-header">
                     <img class="navbar-left" src="assets/planeticon.svg" style="width:40px;height:40px;margin:5px;">
@@ -36,13 +36,16 @@
                 <div class="collapse navbar-collapse navbar-menubuilder">
                     <ul class="nav navbar-nav navbar-right">
                         <li>
-                            <a href="http://www.linkedin.com/in/lukehoel" target="_blank">Luke Hoel</a>
+                            <a href="http://www.lukehoel.com" target="_blank">Luke Hoel</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
-        <canvas id="canvas" style="z-index:-1;position:absolute;top:0;"></canvas>
+        <canvas id="canvas" style="overflow:hidden;">
+
+            
+        </canvas>
     </body>
 </body>
 

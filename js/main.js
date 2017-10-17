@@ -1,35 +1,43 @@
 var stage;
 var container;
-var planet;
-var planetRadius = 500;
-var water;
-var water2;
-var ground;
-var crust;
-var clouds;
-var grassLayer;
-var rockLayer;
-var groundColor;
+
+
+
 
 var colors = [];
 var colorCount = 4;
 
-var landSegments = [];
-var foliageContainer;
-var foliageInfo = [];
-var treeContainer;
-var treeInfo = [];
-var foliageOpacity = 0;
+// var crust;
+// var groundColor;
+// var clouds;
+// var planet;
+// var planetRadius = 500;
+// var water;
+// var water2;
+// var ground;
+// var landSegments = [];
+// var foliageContainer;
+// var foliageInfo = [];
+// var treeContainer;
+// var treeInfo = [];
+// var foliageOpacity = 0;
+
+// var peopleContainer;
+// var peopleInfo = [];
+
+// var houseContainer;
+// var houseInfo = [];
 
 var minimumPlants = 40;
 var plantTimer = 60 * 20;
 var timer = plantTimer;
 
-var peopleContainer;
-var peopleInfo = [];
+var sun = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
 
-var houseContainer;
-var houseInfo = [];
+var planets = [];
+var selectedPlanet;
+var offsetX = 0;
+var offsetY = 0;
 
 var plusKey = false;
 var minusKey = false;
@@ -59,51 +67,56 @@ function init() {
         colors.push(randomColor());
     }
 
-    stage = new createjs.Stage("canvas");
-    starStage = new createjs.Stage("canvas");
-    container = new createjs.Container();
-    foliageContainer = new createjs.Container;
-    treeContainer = new createjs.Container;
-    peopleContainer = new createjs.Container;
-    houseContainer = new createjs.Container;
-    container.regX = window.innerWidth / 2;
-    container.regY = window.innerHeight / 2;
-    container.x = window.innerWidth / 2;
-    container.y = window.innerHeight / 2;
 
-    container.addChild(treeContainer);
-    container.addChild(houseContainer);
-    container.addChild(peopleContainer);
-    container.addChild(foliageContainer);
+    stage = new createjs.Stage("canvas");
+    container = new createjs.Container();
+    container.x = sun.x;
+    container.y = sun.y;
+
+    addPlanet(0, 0, 2000, "sun");
+
+    addPlanet(5000, 5, 500, "planet");
+
+    addPlanet(10000, 5, 800, "planet");
 
     stage.addChild(container);
-    planet = new createjs.Shape();
-    planet.x = window.innerWidth / 2;
-    planet.y = window.innerHeight / 2;
-    container.addChild(planet);
-    addWater();
-    generateTerrain();
-    placeFoliage();
-    placePeople();
-    addClouds();
+
+    // container.addChild(treeContainer);
+    // container.addChild(houseContainer);
+    // container.addChild(peopleContainer);
+    // container.addChild(foliageContainer);
+
+    // stage.addChild(container);
+    // planet = new createjs.Shape();
+    // planet.x = window.innerWidth / 2;
+    // planet.y = window.innerHeight / 2;
+    // container.addChild(planet);
+    // addWater();
+    // generateTerrain();
+    // placeFoliage();
+    // placePeople();
+    // addClouds();
 
     //addDecorLayers();
 
     //container.rotation = Math.random() * 180;
-    if (!isSmallScreen()) {
-        container.scaleX = .3;
-        container.scaleY = .3;
-    } else {
-        container.scaleX = .2;
-        container.scaleY = .2;
-    }
+
     //container.setChildIndex(foliageContainer, container.numChildren - 1)
-    foliageContainer.alpha = 0;
-    treeContainer.alpha = 0;
-    peopleContainer.alpha = 0;
-    houseContainer.alpha = 0;
+    // foliageContainer.alpha = 0;
+    // treeContainer.alpha = 0;
+    // peopleContainer.alpha = 0;
+    // houseContainer.alpha = 0;
     // ground.graphics.clear();
 
+
+    if (!isSmallScreen()) {
+        container.scaleX = .04;
+        container.scaleY = .04;
+    } else {
+        container.scaleX = .03;
+        container.scaleY = .03;
+    }
+    selectedPlanet = planets[0].localPlanetContainer;
     stage.update();
 
     createjs.Ticker.framerate = 60;
@@ -162,7 +175,7 @@ function getName() {
     return name;
 }
 
-function addWater() {
+function addWater(planetx, planety, planetRadius, water, water2) {
     // water = new createjs.Shape();
     // water.graphics.beginFill("blue").drawCircle(0, 0, planetRadius + 50);
     // water.alpha = .5;
@@ -170,16 +183,14 @@ function addWater() {
     // water.y = window.innerHeight / 2;
     // container.addChild(water);
     var waterColor = randomColor();
-    water = new createjs.Shape();
     water.graphics.beginFill(waterColor);
     water.alpha = .5;
-    water.x = window.innerWidth / 2;
-    water.y = window.innerHeight / 2;
-    water2 = new createjs.Shape();
+    water.x = planetx;
+    water.y = planety;
     water2.graphics.beginFill(waterColor);
     water2.alpha = .5;
-    water2.x = window.innerWidth / 2;
-    water2.y = window.innerHeight / 2;
+    water2.x = planetx;
+    water2.y = planety;
     var points = 10;
     for (var i = 0; i < points; i++) {
         var x = (planetRadius + 35) * Math.sin(toRadians((360 / points) * i));
@@ -189,8 +200,6 @@ function addWater() {
     }
     water.rotation = 45;
     water2.scale = 1.03;
-    container.addChild(water2);
-    container.addChild(water);
 
     createjs.Tween.get(water, { loop: true }).to({ scale: 1.03 }, 2000).to({ scale: 1 }, 2000);
     createjs.Tween.get(water2, { loop: true }).to({ scale: 1 }, 2000).to({ scale: 1.03 }, 2000);
@@ -412,7 +421,8 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
-function generateTerrain() {
+function generateTerrain(planetx, planety, ground, groundColor, landSegments, planetRadius) {
+
     var totalMountains = 0;
     var totalOceans = 0;
     var mountainFreq = 10;//gets less likely the higher this gets
@@ -423,8 +433,6 @@ function generateTerrain() {
     var oceanCounter = 0;//oceans can be multiple sides wide, so we need a counter
     var oceanOffCounter = 0;
     var points = 100;
-    crust = new createjs.Shape();
-    ground = new createjs.Shape();
     //ground.graphics.beginFill("#705239");
     groundColor = randomColor();
     ground.graphics.beginFill(groundColor);
@@ -479,31 +487,26 @@ function generateTerrain() {
         }
         if (!isOcean)
             finalOffset += biome.landModifier;
-        var x = planet.x + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i));
-        var y = planet.y + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i));
+        var x = planetx + (planetRadius + finalOffset) * Math.sin(toRadians((360 / points) * i));
+        var y = planety + (planetRadius + finalOffset) * Math.cos(toRadians((360 / points) * i));
         ground.graphics.lineTo(x, y);
-        landSegments.push({ x: x, y: y, isOcean: isOcean, biome: biome });
+        landSegments.push({ x: x, y: y, isOcean: isOcean, biome: biome, dist: finalOffset });
     }
 
     ground.graphics.closePath();
-    container.addChild(ground);
-
-    crust.graphics.closePath();
-    container.addChild(crust);
 }
 
-function addClouds() {
-    clouds = new createjs.Shape();
+function addClouds(clouds, groundColor,planetRadius, planetx,planety,localPlanetContainer) {
     clouds.graphics.beginFill(groundColor).drawCircle(0, 0, planetRadius + 300);
     clouds.alpha = .3;
-    clouds.x = window.innerWidth / 2;
-    clouds.y = window.innerHeight / 2;
+    clouds.x = planetx;
+    clouds.y = planety;
     var blurFilter = new createjs.BlurFilter(250, 250, 1);
     clouds.filters = [blurFilter];
     var bounds = blurFilter.getBounds();
-    clouds.cache(-750 + bounds.x, -750 + bounds.y, 1500 + bounds.width, 1500 + bounds.height);
+    clouds.cache(-(planetRadius/2) + bounds.x, -(planetRadius/2) + bounds.y, planetRadius + bounds.width, planetRadius + bounds.height);
     createjs.Tween.get(clouds, { loop: true }).to({ scale: .9 }, 5000).to({ scale: 1 }, 5000);
-    container.addChild(clouds);
+    localPlanetContainer.addChild(clouds);
 }
 
 function toRadians(degrees) {
@@ -519,85 +522,72 @@ function resize() {
 function update(e) {
     //run everything in here!
     if (!e.paused) {
+        //updatePlanet();
+        if (selectedPlanet != planets[0]) {
+            if (plusKey && container.scaleX < 7.5) {
 
-        if (plusKey && container.scaleX < 7.5) {
+                var holder = selectedPlanet.rotation;
+                selectedPlanet.rotation = 0;
+                var pointbefore = getCenter();
+                container.scaleX += .03 + (container.scaleX / 20);
+                container.scaleY += .03 + (container.scaleY / 20);
+                stage.update();
+                var pointafter = getCenter();
 
-            var holder = container.rotation;
-            container.rotation = 0;
-            var pointbefore = getCenter();
-            container.scaleX += .03 + (container.scaleX / 20);
-            container.scaleY += .03 + (container.scaleY / 20);
-            stage.update();
-            var pointafter = getCenter();
+                var pointdiffX = pointafter.x - pointbefore.x;
+                var pointdiffY = pointafter.y - pointbefore.y;
+                stage.x += (pointdiffX * container.scaleX);
+                stage.y += (pointdiffY * container.scaleY);
+                stage.update();
+                selectedPlanet.rotation = holder;
+            }
+            if (minusKey && container.scaleX > .05) {
 
-            var pointdiffX = pointafter.x - pointbefore.x;
-            var pointdiffY = pointafter.y - pointbefore.y;
-            container.x += (pointdiffX * container.scaleX);
-            container.y += (pointdiffY * container.scaleY);
-            stage.update();
-            container.rotation = holder;
+                var holder = container.rotation;
+                container.rotation = 0;
+
+                var pointbefore = getCenter();
+                container.scaleX += -.03 - (container.scaleX / 20);
+                container.scaleY += -.03 - (container.scaleY / 20);
+                stage.update();
+                var pointafter = getCenter();
+
+                var pointdiffX = pointafter.x - pointbefore.x;
+                var pointdiffY = pointafter.y - pointbefore.y;
+                container.x += pointdiffX * container.scaleX;
+                container.y += pointdiffY * container.scaleY;
+                stage.update();
+                container.rotation = holder;
+            }
         }
-        if (minusKey && container.scaleX > .3) {
-
-            var holder = container.rotation;
-            container.rotation = 0;
-
-            var pointbefore = getCenter();
-            container.scaleX += -.03 - (container.scaleX / 20);
-            container.scaleY += -.03 - (container.scaleY / 20);
-            stage.update();
-            var pointafter = getCenter();
-
-            var pointdiffX = pointafter.x - pointbefore.x;
-            var pointdiffY = pointafter.y - pointbefore.y;
-            container.x += pointdiffX * container.scaleX;
-            container.y += pointdiffY * container.scaleY;
-            stage.update();
-            container.rotation = holder;
-        }
-
         var movement = shiftKey ? 2 : 1;
         for (var i = 0; i < movement; i++) {
             if (downKey) {
-                stage.y += -5 - (container.scaleX / 5);
+                offsetY += -5;
             }
             else if (upKey) {
-                stage.y += 5 + (container.scaleX / 5);
+                offsetY += 5;
             }
             if (rightKey) {
-                stage.x += -5 - (container.scaleX / 5);
+                offsetX += -5;
             }
             else if (leftKey) {
-                stage.x += 5 + (container.scaleX / 5);
+                offsetX += 5;
             }
         }
 
-        if (rotateLeftKey) {
-            container.rotation -= 1;
-        } else if (rotateRightKey) {
-            container.rotation += 1;
-        }
+        stage.x = 0;
+        stage.y = 0;
 
-        houseContainer.alpha = peopleContainer.alpha = treeContainer.alpha = foliageContainer.alpha = foliageOpacity;
-        if (container.scaleX > 1.2) {
-            if (foliageOpacity < 1)
-                foliageOpacity += .1
-        } else {
-            if (foliageOpacity > 0)
-                foliageOpacity -= .1
-        }
+        var point = selectedPlanet.localToGlobal(selectedPlanet.x, selectedPlanet.y);
+        stage.x -= point.x;
+        stage.y -= point.y;
+        stage.x += window.innerWidth / 2;
+        stage.y += window.innerHeight / 2;
 
-        movePeople();
-        timer--;
-        if (timer <= 0) {
-            if (foliageContainer.numChildren < minimumPlants) {
-                placeBushesOnly();
-            }
-            if (treeContainer.numChildren < minimumPlants) {
-                placeTreesOnly();
-            }
-            timer = plantTimer;
-        }
+        stage.x += offsetX;
+        stage.y += offsetY;
+        updatePlanets();
         stage.update();
     }
 }
@@ -812,7 +802,7 @@ function placeHouse(person, stats) {
     house.graphics.beginFill(randomColor());
     house.graphics.drawRect(-5, -5, 12, 20);
     houseContainer.addChild(house);
-    houseInfo.push({ person: person, stats: stats, x: person.x, y: person.y, health: 10 + getRandomInt(5,10) });
+    houseInfo.push({ person: person, stats: stats, x: person.x, y: person.y, health: 10 + getRandomInt(5, 10), section: stats.section, dist: landSegments[stats.section].dist });
 
 }
 
@@ -830,6 +820,9 @@ function getAngle(p1, p2) {
     if (angle > 360)
         angle -= 360;
     return angle;
+}
+function distance(point1, point2) {
+    return Math.hypot(point2.x - point1.x, point2.y - point1.y);
 }
 
 // Get the linear interpolation between two value
@@ -873,15 +866,38 @@ function getCenter() {
     return container.globalToLocal(window.innerWidth / 2, window.innerHeight / 2);
 }
 
+function updatePlanet() {
+    ground.graphics.clear();
+    ground.graphics.beginFill(groundColor);
+    for (var i = 0; i < landSegments.length; i++) {
+        var x = planet.x + (planetRadius + landSegments[i].dist) * Math.sin(toRadians((360 / landSegments.length) * i));
+        var y = planet.y + (planetRadius + landSegments[i].dist) * Math.cos(toRadians((360 / landSegments.length) * i));
+        ground.graphics.lineTo(x, y);
+        landSegments[i].x = x;
+        landSegments[i].y = y;
+    }
+    ground.graphics.closePath();
+}
+
 window.onkeyup = function (e) {
     var key = e.keyCode ? e.keyCode : e.which;
 
     switch (key) {
         case (72):
-            container.scaleX = .3;
-            container.scaleY = .3;
-            container.x = container.regX;
-            container.y = container.regY;
+            // container.scaleX = .3;
+            // container.scaleY = .3;
+            // container.x = container.regX;
+            // container.y = container.regY;
+            // selectedPlanet = planets[0].localPlanetContainer;
+            // if (!isSmallScreen()) {
+            //     container.scaleX = .04;
+            //     container.scaleY = .04;
+            // } else {
+            //     container.scaleX = .03;
+            //     container.scaleY = .03;
+            // }
+            // offsetX = 0;
+            // offsetY = 0;
             break;
         case (32):
             debug();
@@ -963,4 +979,121 @@ function zoomIn() {
 }
 function zoomOut() {
     scale -= .5;
+}
+function addPlanet(planetx, planety, radius, type) {
+    var groundColor;
+    var clouds = new createjs.Shape();
+    var water = new createjs.Shape();
+    var water2 = new createjs.Shape();
+    var ground = new createjs.Shape();
+    var landSegments = [];
+    var foliageContainer;
+    var foliageInfo = [];
+    var treeContainer;
+    var treeInfo = [];
+    var foliageOpacity = 0;
+    var peopleContainer;
+    var peopleInfo = [];
+
+    var houseContainer;
+    var houseInfo = [];
+
+    var planetContainer = new createjs.Container;
+    var localPlanetContainer = new createjs.Container;
+    foliageContainer = new createjs.Container;
+    treeContainer = new createjs.Container;
+    peopleContainer = new createjs.Container;
+    houseContainer = new createjs.Container;
+
+
+    switch (type) {
+        case 'sun':
+            //ground.graphics.beginFill(randomColor());
+            //ground.graphics.drawCircle(0, 0, radius)
+            addWater(planetx, planety, radius, water, water2);
+            createjs.Tween.get(water, { loop: true }).to({ rotation: 360 }, 20000);
+            createjs.Tween.get(water2, { loop: true }).to({ rotation: -360 }, 20000);
+            
+            water2.scale = 1.05;
+            localPlanetContainer.regX = sun.x;
+            localPlanetContainer.regY = sun.y;
+            localPlanetContainer.x = sun.x;
+            localPlanetContainer.y = sun.y;
+
+            planetContainer.x = sun.x;
+            planetContainer.y = sun.y;
+            planetContainer.regX = sun.x;
+            planetContainer.regY = sun.y;
+            selectedPlanet = ground;
+            break;
+        default:
+            localPlanetContainer.regX = planetx;
+            localPlanetContainer.regY = planety;
+            localPlanetContainer.x = planetx;
+            localPlanetContainer.y = planety;
+
+            planetContainer.regX = sun.x;
+            planetContainer.regY = sun.y;
+            generateTerrain(planetx, planety, ground, groundColor, landSegments, radius);
+            addWater(planetx, planety, radius, water, water2);
+            
+            break;
+    }
+    localPlanetContainer.addChild(water);
+    localPlanetContainer.addChild(water2);
+    localPlanetContainer.addChild(ground);
+    planetContainer.rotation = getRandomInt(0, 360);
+    planetContainer.addChild(localPlanetContainer);
+    //if (type != "sun")
+    planets.push({
+        type: type,
+        radius: radius,
+        localPlanetContainer: localPlanetContainer,
+        planetContainer: planetContainer,
+        groundColor: groundColor,
+        clouds: clouds,
+        water: water,
+        water2: water2,
+        ground: ground,
+        landSegments: landSegments,
+        foliageContainer: foliageContainer,
+        foliageInfo: foliageInfo,
+        treeContainer: treeContainer,
+        treeInfo: treeInfo,
+        peopleContainer: peopleContainer,
+        peopleInfo: peopleInfo,
+        houseContainer: houseContainer,
+        houseInfo: houseInfo
+    });
+    localPlanetContainer.addEventListener("click", function (event) {
+        if (selectedPlanet != localPlanetContainer) {
+            selectedPlanet = localPlanetContainer;
+            // if (!isSmallScreen()) {
+            //     container.scaleX = .04;
+            //     container.scaleY = .04;
+            // } else {
+            //     container.scaleX = .03;
+            //     container.scaleY = .03;
+            // }
+            offsetX = 0;
+            offsetY = 0;
+
+            container.scaleX = 0.1;
+            container.scaleY = 0.1;
+        }
+    })
+    container.addChild(planetContainer);
+}
+function updatePlanets() {
+    var rotationSpeedSecs = 20;
+    var rotationSpeed = rotationSpeedSecs / 60;
+    var planetaryOrbitSpeedSecs = 5;
+    var planetaryOrbitSpeed = planetaryOrbitSpeedSecs * 60;
+    for (var i = 0; i < planets.length; i++) {
+        var planet = planets[i];
+        if (planet.type != "sun") {
+            var orbitSpeed = planetaryOrbitSpeed / (distance(planet.localPlanetContainer, planet.planetContainer) / 2);
+            planet.planetContainer.rotation += orbitSpeed;
+        }
+    }
 }
