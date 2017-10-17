@@ -577,48 +577,15 @@ function update(e) {
             }
         }
 
-        // if (rotateLeftKey) {
-        //     container.rotation -= 1;
-        // } else if (rotateRightKey) {
-        //     container.rotation += 1;
-        // }
-
-        // houseContainer.alpha = peopleContainer.alpha = treeContainer.alpha = foliageContainer.alpha = foliageOpacity;
-
-        // if (container.scaleX > 1.2) {
-        //     if (foliageOpacity < 1)
-        //         foliageOpacity += .1
-        // } else {
-        //     if (foliageOpacity > 0)
-        //         foliageOpacity -= .1
-        // }
-
-        // movePeople();
-        // timer--;
-        // if (timer <= 0) {
-        //     if (foliageContainer.numChildren < minimumPlants) {
-        //         placeBushesOnly();
-        //     }
-        //     if (treeContainer.numChildren < minimumPlants) {
-        //         placeTreesOnly();
-        //     }
-        //     timer = plantTimer;
-        // }
         stage.x = 0;
         stage.y = 0;
-        if (selectedPlanet != planets[0].localPlanetContainer) {
-            // var dist = distance(selectedPlanet, planets[0].localPlanetContainer);
-            // var angle = selectedPlanet.rotation;
-            // console.log(angle);
-            // stage.x = dist * Math.sin(toRadians(angle));
-            // stage.y = dist * Math.cos(toRadians(angle));
-            // debugger;
-            var point = selectedPlanet.localToGlobal(selectedPlanet.x, selectedPlanet.y);
-            stage.x -= point.x;
-            stage.y -= point.y;
-            stage.x += window.innerWidth / 2;
-            stage.y += window.innerHeight / 2;
-        }
+
+        var point = selectedPlanet.localToGlobal(selectedPlanet.x, selectedPlanet.y);
+        stage.x -= point.x;
+        stage.y -= point.y;
+        stage.x += window.innerWidth / 2;
+        stage.y += window.innerHeight / 2;
+
         stage.x += offsetX;
         stage.y += offsetY;
         updatePlanets();
@@ -918,10 +885,20 @@ window.onkeyup = function (e) {
 
     switch (key) {
         case (72):
-            container.scaleX = .3;
-            container.scaleY = .3;
-            container.x = container.regX;
-            container.y = container.regY;
+            // container.scaleX = .3;
+            // container.scaleY = .3;
+            // container.x = container.regX;
+            // container.y = container.regY;
+            // selectedPlanet = planets[0].localPlanetContainer;
+            // if (!isSmallScreen()) {
+            //     container.scaleX = .04;
+            //     container.scaleY = .04;
+            // } else {
+            //     container.scaleX = .03;
+            //     container.scaleY = .03;
+            // }
+            // offsetX = 0;
+            // offsetY = 0;
             break;
         case (32):
             debug();
@@ -1064,11 +1041,11 @@ function addPlanet(planetx, planety, radius, type) {
     localPlanetContainer.addChild(water);
     localPlanetContainer.addChild(water2);
     localPlanetContainer.addChild(ground);
-
+    planetContainer.rotation = getRandomInt(0,360);
     planetContainer.addChild(localPlanetContainer);
     //if (type != "sun")
     planets.push({
-        type:type,
+        type: type,
         radius: radius,
         localPlanetContainer: localPlanetContainer,
         planetContainer: planetContainer,
@@ -1102,16 +1079,15 @@ function addPlanet(planetx, planety, radius, type) {
     container.addChild(planetContainer);
 }
 function updatePlanets() {
-    var rotationSpeedSecs = 60;
+    var rotationSpeedSecs = 20;
     var rotationSpeed = rotationSpeedSecs / 60;
-    var planetaryOrbitSpeedSecs = 20;
+    var planetaryOrbitSpeedSecs = 5;
     var planetaryOrbitSpeed = planetaryOrbitSpeedSecs * 60;
     for (var i = 0; i < planets.length; i++) {
         var planet = planets[i];
         if (planet.type != "sun") {
             var orbitSpeed = planetaryOrbitSpeed / (distance(planet.localPlanetContainer, planet.planetContainer) / 2);
             planet.planetContainer.rotation += orbitSpeed;
-            planet.localPlanetContainer.rotation += rotationSpeed;
         }
     }
 }
