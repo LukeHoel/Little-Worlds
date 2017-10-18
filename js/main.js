@@ -38,6 +38,7 @@ var planets = [];
 var selectedPlanet;
 var offsetX = 0;
 var offsetY = 0;
+var rotationOffset = 0;
 
 var plusKey = false;
 var minusKey = false;
@@ -574,6 +575,8 @@ function update(e) {
             }
         }
 
+       
+        updatePlanets();
         stage.x = 0;
         stage.y = 0;
 
@@ -585,7 +588,12 @@ function update(e) {
 
         stage.x += offsetX;
         stage.y += offsetY;
-        updatePlanets();
+
+        if(rotateLeftKey){
+            rotationOffset ++;
+        }else if(rotateRightKey){
+            rotationOffset --;
+        }
         stage.update();
     }
 }
@@ -1097,9 +1105,10 @@ function addPlanet(planetx, planety, radius, type) {
             selectedPlanet = localPlanetContainer;
             offsetX = 0;
             offsetY = 0;
+            rotationOffset = 0
 
             container.scaleX = 0.1;
-            container.scaleY = 0.1;
+            container.scaleY = 0.1;           
         }
     })
     container.addChild(planetContainer);
@@ -1118,6 +1127,7 @@ function updatePlanets() {
             if (selectedPlanet == planet.localPlanetContainer) {
                 stage.rotation = -planet.localAxis.rotation;
                 stage.rotation -= planet.planetContainer.rotation;
+                stage.rotation -= rotationOffset;
             }
         }
     }
