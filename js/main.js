@@ -76,9 +76,24 @@ function init() {
 
     addPlanet(0, 0, 2000, "sun");
 
-    addPlanet(5000, 5, 500, "planet");
+    var amountPlanetsInner = getRandomInt(1, 3);
+    var distInner = 4000;
+    for (var i = 0; i < amountPlanetsInner; i++) {
+        distInner += getRandomInt(1000, 3000);
+        addPlanet(distInner, 0, getRandomInt(300, 1000), "planet");
+    }
+    var astroidBeltRadius = 10000;
+    var astroidSpread = 20;
+    var astroidSize = 50;
+    var astroidCount = 300;
+    var astroidColor = randomColor();
+    for (var i = 0; i < astroidCount; i++) {
+        var astroid = new createjs.Shape();
+    }
 
-    addPlanet(10000, 5, 800, "planet");
+    //addPlanet(5000, 5, 500, "planet");
+
+    //addPlanet(10000, 5, 800, "planet");
 
     stage.addChild(container);
 
@@ -177,12 +192,6 @@ function getName() {
 }
 
 function addWater(planetx, planety, planetRadius, water, water2, groundColor) {
-    // water = new createjs.Shape();
-    // water.graphics.beginFill("blue").drawCircle(0, 0, planetRadius + 50);
-    // water.alpha = .5;
-    // water.x = window.innerWidth / 2;
-    // water.y = window.innerHeight / 2;
-    // container.addChild(water);
     water.graphics.beginFill(groundColor);
     water.alpha = .5;
     water.x = planetx;
@@ -429,10 +438,13 @@ function generateTerrain(planetx, planety, ground, groundColor, landSegments, pl
     var mountainHeight = 20;
     var oceanFreq = 30;
     var oceanWidth = 8;
-    var oceanDepth = 80;
+    var oceanDepth = 80 + planetRadius / 10;
     var oceanCounter = 0;//oceans can be multiple sides wide, so we need a counter
     var oceanOffCounter = 0;
-    var points = 100;
+    var points = 75;
+    if(planetRadius < 700){
+        points += (planetRadius - 700)/10;
+    }
     //ground.graphics.beginFill("#705239");
     ground.graphics.beginFill(groundColor);
 
@@ -523,7 +535,7 @@ function update(e) {
     if (!e.paused) {
         //updatePlanet();
         var angle = getAngle(getCenter(), selectedPlanet);
-        if (selectedPlanet != planets[0]) {
+        if (selectedPlanet != planets[0].localPlanetContainer) {
             if (plusKey && container.scaleX < 1) {
                 container.scaleX += .03 + (container.scaleX / 20);
                 container.scaleY += .03 + (container.scaleY / 20);
@@ -868,6 +880,18 @@ window.onkeyup = function (e) {
             offsetX = 0;
             offsetY = 0;
             rotationOffset = 0;
+            if (selectedPlanet != planets[0].localPlanetContainer) {
+                container.scaleX = 0.1;
+                container.scaleY = 0.1;
+            } else {
+                if (!isSmallScreen()) {
+                    container.scaleX = .04;
+                    container.scaleY = .04;
+                } else {
+                    container.scaleX = .03;
+                    container.scaleY = .03;
+                }
+            }
             break;
         case (32):
             debug();
@@ -981,9 +1005,8 @@ function addPlanet(planetx, planety, radius, type) {
             //ground.graphics.drawCircle(0, 0, radius)
             groundColor = randomColor();
             addWater(planetx, planety, radius, water, water2, groundColor);
-            createjs.Tween.get(water, { loop: true }).to({ rotation: 360 }, 20000);
-            createjs.Tween.get(water2, { loop: true }).to({ rotation: 360 }, 10000);
-            water2.scale = 1.05;
+
+            water2.scale = 1.1;
             localPlanetContainer.regX = sun.x;
             localPlanetContainer.regY = sun.y;
             localPlanetContainer.x = sun.x;
@@ -1002,6 +1025,7 @@ function addPlanet(planetx, planety, radius, type) {
                 atmosphere.alpha = .15 - ((.15 / atmosphereLayers) * i);
                 atmosphere.graphics.drawCircle(0, 0, radius * (1.5 * i));
                 localPlanetContainer.addChild(atmosphere);
+                
             }
             break;
         default:
@@ -1019,6 +1043,7 @@ function addPlanet(planetx, planety, radius, type) {
             }
             generateTerrain(planetx, planety, ground, groundColor, landSegments, radius);
             addWater(planetx, planety, radius, water, water2, randomColor());
+            water2.rotation = 15;
             placeFoliage(landSegments, colors, foliageContainer, foliageInfo, treeContainer, treeInfo);
             var atmosphereLayers = 3;
             for (var i = 1; i <= atmosphereLayers; i++) {
@@ -1049,7 +1074,11 @@ function addPlanet(planetx, planety, radius, type) {
     localAxis.addChild(foliageContainer);
     localAxis.addChild(ground);
     localPlanetContainer.addChild(localAxis);
-    planetContainer.rotation = getRandomInt(0, 360);
+    if (planets.length == 0)
+        planetContainer.rotation = getRandomInt(0, 360);
+    else {
+        planetContainer.rotation = planets[planets.length - 1].planetContainer.rotation + getRandomInt(50, 360 - 50);
+    }
     planetContainer.addChild(localPlanetContainer);
     //if (type != "sun")
     planets.push({
@@ -1100,12 +1129,12 @@ function addPlanet(planetx, planety, radius, type) {
 function updatePlanets() {
     var rotationSpeedSecs = 20;
     var rotationSpeed = rotationSpeedSecs / 60;
-    var planetaryOrbitSpeedSecs = 5;
+    var planetaryOrbitSpeedSecs = 10;
     var planetaryOrbitSpeed = planetaryOrbitSpeedSecs * 60;
     for (var i = 0; i < planets.length; i++) {
         var planet = planets[i];
         if (planet.type != "sun") {
-            var orbitSpeed = planetaryOrbitSpeed / (distance(planet.localPlanetContainer, planet.planetContainer) / 2);
+            var orbitSpeed = planetaryOrbitSpeed / (distance(planet.localPlanetContainer, planet.planetContainer));
             planet.planetContainer.rotation += orbitSpeed;
             planet.localAxis.rotation += rotationSpeed;
             if (selectedPlanet == planet.localPlanetContainer) {
@@ -1113,6 +1142,20 @@ function updatePlanets() {
                 stage.rotation -= planet.planetContainer.rotation;
                 stage.rotation -= rotationOffset;
             }
+            if (container.scaleX > 0.4) {
+                planet.foliageContainer.alpha = 1;
+                planet.treeContainer.alpha = 1;
+                planet.peopleContainer.alpha = 1;
+                planet.houseContainer.alpha = 1;
+            } else {
+                planet.foliageContainer.alpha = 0;
+                planet.treeContainer.alpha = 0;
+                planet.peopleContainer.alpha = 0;
+                planet.houseContainer.alpha = 0;
+            }
+        } else {
+            planet.water.rotation += .5;
+            planet.water2.rotation -= .5;
         }
     }
 }
