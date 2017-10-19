@@ -54,8 +54,6 @@ function init() {
     stage = new createjs.Stage("canvas");
     container = new createjs.Container();
     asteroidBeltContainer = new createjs.Container();
-    container.x = sun.x;
-    container.y = sun.y;
 
     addPlanet(0, 0, 2000, "sun");
 
@@ -68,11 +66,11 @@ function init() {
         addPlanet(distInner, 0, planetRad, "planet");
         distInner += planetRad;
     }
-    var asteroidBeltRadius = distInner +5500
+    var asteroidBeltRadius = 16000;
     var asteroidSpread = 6000;
     var asteroidSize = 150;
     var asteroidSizeVariance = 100;
-    var asteroidCount = 300;
+    var asteroidCount = 200;
     var asteroidColor = randomColor();
 
     for (var i = 0; i < asteroidCount; i++) {
@@ -102,6 +100,7 @@ function init() {
         container.scaleY = .03;
     }
     selectedPlanet = planets[0].localPlanetContainer;
+    stage.alpha = 0;
     stage.update();
 
     createjs.Ticker.framerate = 60;
@@ -534,7 +533,7 @@ function update(e) {
 
         updatePlanets();
         updateAsteroids();
-        stage.x = 0;
+        stage.x = -1000;
         stage.y = 0;
 
         var point = selectedPlanet.localToGlobal(selectedPlanet.x, selectedPlanet.y);
@@ -551,6 +550,7 @@ function update(e) {
         } else if (rotateRightKey) {
             rotationOffset--;
         }
+        stage.alpha = 1;
         stage.update();
     }
 }
