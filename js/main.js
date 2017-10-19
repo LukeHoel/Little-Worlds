@@ -7,27 +7,6 @@ var container;
 var colors = [];
 var colorCount = 4;
 
-// var crust;
-// var groundColor;
-// var clouds;
-// var planet;
-// var planetRadius = 500;
-// var water;
-// var water2;
-// var ground;
-// var landSegments = [];
-// var foliageContainer;
-// var foliageInfo = [];
-// var treeContainer;
-// var treeInfo = [];
-// var foliageOpacity = 0;
-
-// var peopleContainer;
-// var peopleInfo = [];
-
-// var houseContainer;
-// var houseInfo = [];
-
 var minimumPlants = 40;
 var plantTimer = 60 * 20;
 var timer = plantTimer;
@@ -39,6 +18,9 @@ var selectedPlanet;
 var offsetX = 0;
 var offsetY = 0;
 var rotationOffset = 0;
+
+var asteroids = [];
+var asteroidBeltContainer;
 
 var plusKey = false;
 var minusKey = false;
@@ -71,59 +53,46 @@ function init() {
 
     stage = new createjs.Stage("canvas");
     container = new createjs.Container();
+    asteroidBeltContainer = new createjs.Container();
     container.x = sun.x;
     container.y = sun.y;
 
     addPlanet(0, 0, 2000, "sun");
 
-    var amountPlanetsInner = getRandomInt(1, 3);
+    var amountPlanetsInner = getRandomInt(2, 4);
     var distInner = 4000;
     for (var i = 0; i < amountPlanetsInner; i++) {
         distInner += getRandomInt(1000, 3000);
-        addPlanet(distInner, 0, getRandomInt(300, 1000), "planet");
-    }
-    var astroidBeltRadius = 10000;
-    var astroidSpread = 20;
-    var astroidSize = 50;
-    var astroidCount = 300;
-    var astroidColor = randomColor();
-    for (var i = 0; i < astroidCount; i++) {
-        var astroid = new createjs.Shape();
-    }
+        var planetRad = getRandomInt(300, 1000);
 
-    //addPlanet(5000, 5, 500, "planet");
+        addPlanet(distInner, 0, planetRad, "planet");
+        distInner += planetRad;
+    }
+    var asteroidBeltRadius = distInner +5500
+    var asteroidSpread = 6000;
+    var asteroidSize = 150;
+    var asteroidSizeVariance = 100;
+    var asteroidCount = 300;
+    var asteroidColor = randomColor();
 
-    //addPlanet(10000, 5, 800, "planet");
+    for (var i = 0; i < asteroidCount; i++) {
+        var asteroid = new createjs.Shape();
+        var x = (asteroidBeltRadius + getRandomInt(-asteroidSpread, asteroidSpread)) * Math.sin(toRadians((360 / asteroidCount) * i));
+        var y = (asteroidBeltRadius + getRandomInt(-asteroidSpread, asteroidSpread)) * Math.cos(toRadians((360 / asteroidCount) * i));
+        asteroid.graphics.beginFill(asteroidColor);
+        var size = asteroidSize + getRandomInt(-asteroidSizeVariance, asteroidSizeVariance);
+        asteroid.graphics.drawEllipse(0, 0, size + getRandomInt(-size/3 , size/3), size + getRandomInt(-size/3 , size/3));
+        asteroid.x = x;
+        asteroid.y = y;
+        asteroid.regX = getRandomInt(-200,200);
+        asteroid.regY = getRandomInt(-200,200);
+        asteroidBeltContainer.addChild(asteroid);
+        asteroids.push({asteroid:asteroid, rotationSpeed: (Math.random())});
+    }
+    container.addChild(asteroidBeltContainer);
+    container.setChildIndex(asteroidBeltContainer, 0);
 
     stage.addChild(container);
-
-    // container.addChild(treeContainer);
-    // container.addChild(houseContainer);
-    // container.addChild(peopleContainer);
-    // container.addChild(foliageContainer);
-
-    // stage.addChild(container);
-    // planet = new createjs.Shape();
-    // planet.x = window.innerWidth / 2;
-    // planet.y = window.innerHeight / 2;
-    // container.addChild(planet);
-    // addWater();
-    // generateTerrain();
-    // placeFoliage();
-    // placePeople();
-    // addClouds();
-
-    //addDecorLayers();
-
-    //container.rotation = Math.random() * 180;
-
-    //container.setChildIndex(foliageContainer, container.numChildren - 1)
-    // foliageContainer.alpha = 0;
-    // treeContainer.alpha = 0;
-    // peopleContainer.alpha = 0;
-    // houseContainer.alpha = 0;
-    // ground.graphics.clear();
-
 
     if (!isSmallScreen()) {
         container.scaleX = .04;
@@ -395,7 +364,7 @@ function placeBushesOnly() {
     }
 }
 
-function placePeople() {
+function placePeople(landSegments, peopleInfo, peopleContainer) {
     var peopleCount = 1;
     var chance = 5;
     var color = randomColor();
@@ -442,8 +411,9 @@ function generateTerrain(planetx, planety, ground, groundColor, landSegments, pl
     var oceanCounter = 0;//oceans can be multiple sides wide, so we need a counter
     var oceanOffCounter = 0;
     var points = 75;
-    if(planetRadius < 700){
-        points += (planetRadius - 700)/10;
+    if (planetRadius < 700) {
+        points += (planetRadius - 700) / 10;
+        oceanWidth += (planetRadius - 700) / 100;
     }
     //ground.graphics.beginFill("#705239");
     ground.graphics.beginFill(groundColor);
@@ -468,7 +438,7 @@ function generateTerrain(planetx, planety, ground, groundColor, landSegments, pl
         var finalOffset = offset + (Math.random() * variance);
         if (oceanOffCounter <= 0) {
             if ((Math.random() * oceanFreq) <= 1 && oceanCounter <= 0) {
-                oceanCounter = oceanWidth + getRandomInt(0, 7);
+                oceanCounter = oceanWidth + getRandomInt(0, 6);
                 oceanOffCounter = 3;
             }
         } else {
@@ -563,6 +533,7 @@ function update(e) {
 
 
         updatePlanets();
+        updateAsteroids();
         stage.x = 0;
         stage.y = 0;
 
@@ -584,7 +555,7 @@ function update(e) {
     }
 }
 
-function movePeople() {
+function movePeople(peopleContainer, peopleInfo, localAxis, landSegments, houseContainer, houseInfo, treeContainer, treeInfo, foliageContainer, foliageInfo) {
     for (var i = 0; i < peopleContainer.numChildren; i++) {
         var person = peopleContainer.getChildAt(i);
         var stats = peopleInfo[i];
@@ -599,7 +570,7 @@ function movePeople() {
         var nothing = -1;
         var walkLeft = 0;
         var walkRight = 1;
-        var angleFromCenter = getAngle(person, container);
+        var angleFromCenter = getAngle(person, localAxis);
 
         stats.food -= 0.001;
         var hasHouse = false;
@@ -635,7 +606,7 @@ function movePeople() {
                     closest = o;
                 }
             }
-            var closestBush = getAngle(foliageInfo[closest], container);
+            var closestBush = getAngle(foliageInfo[closest], localAxis);
             if (Math.abs(angleFromCenter - closestBush) > .3) {
                 if (angleFromCenter < closestBush)
                     action = walkRight;
@@ -650,15 +621,15 @@ function movePeople() {
         else if (stats.wood < woodNeeded && treeContainer.numChildren > 0) {
             var closest = 0;
             for (var o = 0; o < treeInfo.length; o++) {
-                var bushAngle = getAngle(treeInfo[o], container);
-                var closeAngle = getAngle(treeInfo[closest], container);
+                var bushAngle = getAngle(treeInfo[o], localAxis);
+                var closeAngle = getAngle(treeInfo[closest], localAxis);
                 var dist1 = Math.abs(closeAngle - angleFromCenter);
                 var dist2 = Math.abs(bushAngle - angleFromCenter);
                 if (dist1 > dist2) {
                     closest = o;
                 }
             }
-            var closestBush = getAngle(treeInfo[closest], container);
+            var closestBush = getAngle(treeInfo[closest], localAxis);
             if (Math.abs(angleFromCenter - closestBush) > .3) {
                 if (angleFromCenter < closestBush)
                     action = walkRight;
@@ -675,7 +646,7 @@ function movePeople() {
                     action = walkRight;
                 else if (stats.percent > .6)
                     action = walkLeft;
-                placeHouse(person, stats);
+                placeHouse(person, stats, houseContainer, houseInfo, landSegments);
             }
             else
                 action = walkRight;
@@ -780,7 +751,7 @@ function movePeople() {
     }
 }
 
-function placeHouse(person, stats) {
+function placeHouse(person, stats, houseContainer, houseInfo, landSegments) {
     var house = new createjs.Shape();
     house.x = person.x;
     house.y = person.y;
@@ -1012,10 +983,6 @@ function addPlanet(planetx, planety, radius, type) {
             localPlanetContainer.x = sun.x;
             localPlanetContainer.y = sun.y;
 
-            planetContainer.x = sun.x;
-            planetContainer.y = sun.y;
-            planetContainer.regX = sun.x;
-            planetContainer.regY = sun.y;
             selectedPlanet = ground;
 
             var atmosphereLayers = 5;
@@ -1025,7 +992,7 @@ function addPlanet(planetx, planety, radius, type) {
                 atmosphere.alpha = .15 - ((.15 / atmosphereLayers) * i);
                 atmosphere.graphics.drawCircle(0, 0, radius * (1.5 * i));
                 localPlanetContainer.addChild(atmosphere);
-                
+
             }
             break;
         default:
@@ -1045,6 +1012,7 @@ function addPlanet(planetx, planety, radius, type) {
             addWater(planetx, planety, radius, water, water2, randomColor());
             water2.rotation = 15;
             placeFoliage(landSegments, colors, foliageContainer, foliageInfo, treeContainer, treeInfo);
+            placePeople(landSegments, peopleInfo, peopleContainer);
             var atmosphereLayers = 3;
             for (var i = 1; i <= atmosphereLayers; i++) {
                 var atmosphere = new createjs.Shape();
@@ -1129,12 +1097,16 @@ function addPlanet(planetx, planety, radius, type) {
 function updatePlanets() {
     var rotationSpeedSecs = 20;
     var rotationSpeed = rotationSpeedSecs / 60;
-    var planetaryOrbitSpeedSecs = 10;
-    var planetaryOrbitSpeed = planetaryOrbitSpeedSecs * 60;
+
     for (var i = 0; i < planets.length; i++) {
+
         var planet = planets[i];
+
         if (planet.type != "sun") {
-            var orbitSpeed = planetaryOrbitSpeed / (distance(planet.localPlanetContainer, planet.planetContainer));
+            var dist = distance(planet.localAxis, planets[0].water) / 2000;
+            var planetaryOrbitSpeed = (.5 / dist);
+
+            var orbitSpeed = planetaryOrbitSpeed;
             planet.planetContainer.rotation += orbitSpeed;
             planet.localAxis.rotation += rotationSpeed;
             if (selectedPlanet == planet.localPlanetContainer) {
@@ -1145,8 +1117,11 @@ function updatePlanets() {
             if (container.scaleX > 0.4) {
                 planet.foliageContainer.alpha = 1;
                 planet.treeContainer.alpha = 1;
-                planet.peopleContainer.alpha = 1;
-                planet.houseContainer.alpha = 1;
+                if (selectedPlanet == planet.localPlanetContainer) {
+                    planet.peopleContainer.alpha = 1;
+                    planet.houseContainer.alpha = 1;
+                    movePeople(planet.peopleContainer, planet.peopleInfo, planet.localAxis, planet.landSegments, planet.houseContainer, planet.houseInfo, planet.treeContainer, planet.treeInfo, planet.foliageContainer, planet.foliageInfo);
+                }
             } else {
                 planet.foliageContainer.alpha = 0;
                 planet.treeContainer.alpha = 0;
@@ -1158,4 +1133,10 @@ function updatePlanets() {
             planet.water2.rotation -= .5;
         }
     }
+}
+function updateAsteroids(){
+    for(var i = 0 ; i < asteroids.length; i++){
+        asteroids[i].asteroid.rotation +=  asteroids[i].rotationSpeed;
+    }
+    asteroidBeltContainer.rotation += .03;
 }
