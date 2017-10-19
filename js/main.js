@@ -44,6 +44,30 @@ function init() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    // var amountStarColors = 20;
+    // var amountStars = 100;
+    // var bounds = 500;
+    // var bgStarContainer = new createjs.Container();
+    // var colors = [];
+    // for(var i = 0; i< amountStarColors; i++){
+    //     colors.push(randomColor());
+    // }
+    // for(var i = 0; i< amountStars; i ++){
+    //     var star = new createjs.Shape();
+    //     star.x = getRandomInt(10,bounds-10);
+    //     star.y = getRandomInt(10,bounds-10);
+    //     star.graphics.beginFill(colors[getRandomInt(0,amountStarColors)]);
+    //     star.graphics.drawCircle(0,0,10);
+    //     star.alpha = .5;
+    //     bgStarContainer.addChild(star);
+    // }
+    // var cache = bgStarContainer.cache(0,0,bounds,bounds);
+    // var url = cache.getCacheDataURL();
+
+    // var img = new Image();
+    // img.src = url;
+    // canvas.backgroundImage = img;
+
     window.addEventListener('resize', resize, false);
 
     for (var i = 0; i < colorCount; i++) {
@@ -79,13 +103,13 @@ function init() {
         var y = (asteroidBeltRadius + getRandomInt(-asteroidSpread, asteroidSpread)) * Math.cos(toRadians((360 / asteroidCount) * i));
         asteroid.graphics.beginFill(asteroidColor);
         var size = asteroidSize + getRandomInt(-asteroidSizeVariance, asteroidSizeVariance);
-        asteroid.graphics.drawEllipse(0, 0, size + getRandomInt(-size/3 , size/3), size + getRandomInt(-size/3 , size/3));
+        asteroid.graphics.drawEllipse(0, 0, size + getRandomInt(-size / 3, size / 3), size + getRandomInt(-size / 3, size / 3));
         asteroid.x = x;
         asteroid.y = y;
-        asteroid.regX = getRandomInt(-200,200);
-        asteroid.regY = getRandomInt(-200,200);
+        asteroid.regX = getRandomInt(-200, 200);
+        asteroid.regY = getRandomInt(-200, 200);
         asteroidBeltContainer.addChild(asteroid);
-        asteroids.push({asteroid:asteroid, rotationSpeed: (Math.random())});
+        asteroids.push({ asteroid: asteroid, rotationSpeed: (Math.random()) });
     }
     container.addChild(asteroidBeltContainer);
     container.setChildIndex(asteroidBeltContainer, 0);
@@ -502,8 +526,14 @@ function resize() {
 function update(e) {
     //run everything in here!
     if (!e.paused) {
-        //updatePlanet();
-        var angle = getAngle(getCenter(), selectedPlanet);
+        var canvas = document.getElementsByTagName('canvas')[0];
+        if (offsetY > 850 || offsetY < -750 || offsetX < -1100 || offsetX > 1000){
+            canvas.style.backgroundColor = "black";
+        }else{
+            canvas.style.backgroundColor = "#00032e";
+        }
+            //updatePlanet();
+            var angle = getAngle(getCenter(), selectedPlanet);
         if (selectedPlanet != planets[0].localPlanetContainer) {
             if (plusKey && container.scaleX < 1) {
                 container.scaleX += .03 + (container.scaleX / 20);
@@ -534,7 +564,7 @@ function update(e) {
         updatePlanets();
         updateAsteroids();
         stage.x = -1000;
-        stage.y = 0;
+        stage.y = -1000;
 
         var point = selectedPlanet.localToGlobal(selectedPlanet.x, selectedPlanet.y);
         stage.x -= point.x;
@@ -1132,11 +1162,14 @@ function updatePlanets() {
             planet.water.rotation += .5;
             planet.water2.rotation -= .5;
         }
+        if(planet.foliageInfo.length < minimumPlants && planet.foliageInfo.length < minimumPlants){
+            placeFoliage(planet.landSegments, planet.colors, planet.foliageContainer, planet.foliageInfo, planet.treeContainer, planet.treeInfo);
+        }
     }
 }
-function updateAsteroids(){
-    for(var i = 0 ; i < asteroids.length; i++){
-        asteroids[i].asteroid.rotation +=  asteroids[i].rotationSpeed;
+function updateAsteroids() {
+    for (var i = 0; i < asteroids.length; i++) {
+        asteroids[i].asteroid.rotation += asteroids[i].rotationSpeed;
     }
     asteroidBeltContainer.rotation += .03;
 }
