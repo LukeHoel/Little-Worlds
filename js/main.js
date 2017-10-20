@@ -118,18 +118,10 @@ function init() {
         offsetX += ev.velocityX * panSpeed;
         offsetY += ev.velocityY * panSpeed;
     });
-    mc.on("pinchin pinchout", function (ev) {
-        switch (ev.type) {
-            case ("pinchin"):
-            container.scaleX += ev.velocityX/100;
-            container.scaleY += ev.velocityX/100;
-                break;
-            case ("pinchout"):
-            container.scaleX -= ev.velocityX/100;
-            container.scaleY -= ev.velocityX/100;
-                break;
-
-        }
+    mc.on("pinch", function (ev) {
+        pinchCenter = rawCenter(ev);
+        container.scaleX = ev.scale;
+        container.scaleY = ev.scale;
     });
     stage.update();
 
