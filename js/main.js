@@ -109,13 +109,25 @@ function init() {
     selectedPlanet = planets[0].localPlanetContainer;
     stage.alpha = 0;
     createjs.Touch.enable(stage);
-
+    //hammer js gestures
     var mc = new Hammer(canvas);
     mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+    mc.get('pinch').set({ enable: true });
     var panSpeed = 20;
     mc.on("pan", function (ev) {
         offsetX += ev.velocityX * panSpeed;
         offsetY += ev.velocityY * panSpeed;
+    });
+    mc.on("pinchin pinchout", function (ev) {
+        switch (ev.type) {
+            case ("pinchin"):
+                zoomIn();
+                break;
+            case ("pinchout"):
+                zoomOut();
+                break;
+
+        }
     });
 
     stage.update();
@@ -528,14 +540,13 @@ function update(e) {
         //updatePlanet();
         var angle = getAngle(getCenter(), selectedPlanet);
         if (selectedPlanet != planets[0].localPlanetContainer) {
-            if (plusKey && container.scaleX < 1) {
-                container.scaleX += .03 + (container.scaleX / 20);
-                container.scaleY += .03 + (container.scaleY / 20);
+            if (plusKey) {
+                zoomIn();
             }
-            if (minusKey && container.scaleX > .05) {
-                container.scaleX += -.03 - (container.scaleX / 20);
-                container.scaleY += -.03 - (container.scaleY / 20);
+            if (minusKey) {
+                zoomOut();
             }
+
         }
         var movement = shiftKey ? 2 : 1;
         for (var i = 0; i < movement; i++) {
@@ -963,10 +974,16 @@ function luminanace(hex) {
     return luma;
 }
 function zoomIn() {
-    scale += .5;
+    if (container.scaleX < 1) {
+        container.scaleX += .03 + (container.scaleX / 20);
+        container.scaleY += .03 + (container.scaleY / 20);
+    }
 }
 function zoomOut() {
-    scale -= .5;
+    if (container.scaleX > .05) {
+        container.scaleX += -.03 - (container.scaleX / 20);
+        container.scaleY += -.03 - (container.scaleY / 20);
+    }
 }
 function addPlanet(planetx, planety, radius, type) {
     var groundColor;
