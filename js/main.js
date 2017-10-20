@@ -121,12 +121,12 @@ function init() {
     mc.on("pinchin pinchout", function (ev) {
         switch (ev.type) {
             case ("pinchin"):
-            container.scaleX += ev.velocityX;
-            container.scaleY += ev.velocityX;
+            container.scaleX += ev.velocityX/100;
+            container.scaleY += ev.velocityX/100;
                 break;
             case ("pinchout"):
-            container.scaleX -= ev.velocityX;
-            container.scaleY -= ev.velocityX;
+            container.scaleX -= ev.velocityX/100;
+            container.scaleY -= ev.velocityX/100;
                 break;
 
         }
