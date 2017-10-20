@@ -35,6 +35,14 @@ var selectLeftKey = false;
 var selectRightKey = false;
 var rotateLeftKey = false;
 var rotateRightKey = false;
+
+var mouseDownPoint;
+function shadeColor2(color, percent) {
+    var f = parseInt(color.slice(1), 16), t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = f >> 16, G = f >> 8 & 0x00FF, B = f & 0x0000FF;
+    return "#" + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
+}
+
+
 function debug() {
     debugger;
 }
@@ -43,30 +51,6 @@ function init() {
     var canvas = document.getElementsByTagName('canvas')[0];
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
-    // var amountStarColors = 20;
-    // var amountStars = 100;
-    // var bounds = 500;
-    // var bgStarContainer = new createjs.Container();
-    // var colors = [];
-    // for(var i = 0; i< amountStarColors; i++){
-    //     colors.push(randomColor());
-    // }
-    // for(var i = 0; i< amountStars; i ++){
-    //     var star = new createjs.Shape();
-    //     star.x = getRandomInt(10,bounds-10);
-    //     star.y = getRandomInt(10,bounds-10);
-    //     star.graphics.beginFill(colors[getRandomInt(0,amountStarColors)]);
-    //     star.graphics.drawCircle(0,0,10);
-    //     star.alpha = .5;
-    //     bgStarContainer.addChild(star);
-    // }
-    // var cache = bgStarContainer.cache(0,0,bounds,bounds);
-    // var url = cache.getCacheDataURL();
-
-    // var img = new Image();
-    // img.src = url;
-    // canvas.backgroundImage = img;
 
     window.addEventListener('resize', resize, false);
 
@@ -125,6 +109,20 @@ function init() {
     }
     selectedPlanet = planets[0].localPlanetContainer;
     stage.alpha = 0;
+
+    stage.on("mousedown", function (evt) {
+        mouseDownPoint = { x: evt.stageX, y: evt.stageY };
+    });
+    stage.on("pressmove", function (evt) {
+        if (evt.stageX > mouseDownPoint.x + 5)
+            offsetX += 5;
+        else if (evt.stageX < mouseDownPoint.x - 5)
+            offsetX -= 5;
+        if (evt.stageY > mouseDownPoint.y + 5)
+            offsetY += 5;
+        else if (evt.stageY < mouseDownPoint.y - 5)
+            offsetY -= 5;
+    });
     stage.update();
 
     createjs.Ticker.framerate = 60;
@@ -527,13 +525,13 @@ function update(e) {
     //run everything in here!
     if (!e.paused) {
         var canvas = document.getElementsByTagName('canvas')[0];
-        if (offsetY > 850 || offsetY < -750 || offsetX < -1100 || offsetX > 1000){
+        if (offsetY > 850 || offsetY < -750 || offsetX < -1100 || offsetX > 1000) {
             canvas.style.backgroundColor = "black";
-        }else{
+        } else {
             canvas.style.backgroundColor = "#00032e";
         }
-            //updatePlanet();
-            var angle = getAngle(getCenter(), selectedPlanet);
+        //updatePlanet();
+        var angle = getAngle(getCenter(), selectedPlanet);
         if (selectedPlanet != planets[0].localPlanetContainer) {
             if (plusKey && container.scaleX < 1) {
                 container.scaleX += .03 + (container.scaleX / 20);
@@ -1162,7 +1160,7 @@ function updatePlanets() {
             planet.water.rotation += .5;
             planet.water2.rotation -= .5;
         }
-        if(planet.foliageInfo.length < minimumPlants && planet.foliageInfo.length < minimumPlants){
+        if (planet.foliageInfo.length < minimumPlants && planet.foliageInfo.length < minimumPlants) {
             placeFoliage(planet.landSegments, planet.colors, planet.foliageContainer, planet.foliageInfo, planet.treeContainer, planet.treeInfo);
         }
     }
