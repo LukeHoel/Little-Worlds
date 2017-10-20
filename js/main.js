@@ -121,15 +121,16 @@ function init() {
     mc.on("pinchin pinchout", function (ev) {
         switch (ev.type) {
             case ("pinchin"):
-                zoomIn();
+            container.scaleX += ev.velocityX;
+            container.scaleY += ev.velocityX;
                 break;
             case ("pinchout"):
-                zoomOut();
+            container.scaleX += ev.velocityX;
+            container.scaleY += ev.velocityX;
                 break;
 
         }
     });
-
     stage.update();
 
     createjs.Ticker.framerate = 60;
