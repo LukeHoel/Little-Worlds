@@ -106,8 +106,8 @@ function init() {
         container.scaleX = .04;
         container.scaleY = .04;
     } else {
-        container.scaleX = .03;
-        container.scaleY = .03;
+        container.scaleX = .02;
+        container.scaleY = .02;
     }
     selectedPlanet = planets[0].localPlanetContainer;
     stage.alpha = 0;
@@ -1119,8 +1119,8 @@ function addPlanet(planetx, planety, radius, type) {
                     container.scaleX = .04;
                     container.scaleY = .04;
                 } else {
-                    container.scaleX = .03;
-                    container.scaleY = .03;
+                    container.scaleX = .02;
+                    container.scaleY = .02;
                 }
             }
         }

@@ -24,13 +24,13 @@
         <body onload="init();">
             <div class="underunderlay" style="z-index:0;position:absolute;top:0;left:0;width:100%;height:100%;">
             </div>
-            <div id="stars">
-                <div class="underlay" style="z-index:0;position:absolute;top:0px;left:-px;width:100%;height:100%;">
+            <div id="stars" style="pointer-events: none;">
+                <div class="underlay animate" style="z-index:0;position:absolute;top:0px;left:-px;width:100%;height:100%;">
                 </div>
-                <div class="underlay2" style="z-index:1;position:absolute;top:0px;left:0px;width:100%;height:100%;">
+                <div class="underlay2 animate animate2" style="z-index:1;position:absolute;top:0px;left:0px;width:100%;height:100%;">
                 </div>
             </div>
-            <div id="custom-bootstrap-menu" class="navbar navbar-default" role="navigation" style="margin-bottom:0px;">
+            <div id="custom-bootstrap-menu" class="navbar navbar-default" role="navigation" style="z-index : 1;margin-bottom:0px;">
                 <div class="container-fluid">
                     <div class="navbar-header">
                         <img class="navbar-left" src="assets/planeticon.svg" style="width:40px;height:40px;margin:5px;">
