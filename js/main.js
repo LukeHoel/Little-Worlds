@@ -109,10 +109,11 @@ function init() {
     selectedPlanet = planets[0].localPlanetContainer;
     stage.alpha = 0;
     createjs.Touch.enable(stage);
-    selectedPlanet.on("pressmove", function (evt) {
-        offsetX = evt.stageX - window.innerWidth/2;
-        offsetY = evt.stageY- window.innerHeight/2;
-    });
+    canvas.addEventListener("touchmove", function (evt) {
+        var touch = evt.changedTouches[0];
+        offsetX = touch.pageX - window.innerWidth / 2;
+        offsetY = touch.pageY - window.innerHeight / 2;
+    }, false);
     stage.update();
 
     createjs.Ticker.framerate = 60;
