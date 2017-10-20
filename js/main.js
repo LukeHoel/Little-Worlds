@@ -120,8 +120,8 @@ function init() {
     });
     mc.on("pinch", function (ev) {
         pinchCenter = rawCenter(ev);
-        container.scaleX = ev.scale;
-        container.scaleY = ev.scale;
+        container.scaleX += ev.scale;
+        container.scaleY += ev.scale;
     });
     stage.update();
 
