@@ -125,8 +125,8 @@ function init() {
             container.scaleY += ev.velocityX;
                 break;
             case ("pinchout"):
-            container.scaleX += ev.velocityX;
-            container.scaleY += ev.velocityX;
+            container.scaleX -= ev.velocityX;
+            container.scaleY -= ev.velocityX;
                 break;
 
         }
