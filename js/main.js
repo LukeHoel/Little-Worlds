@@ -47,6 +47,9 @@ function debug() {
 }
 
 function init() {
+    document.getElementsByClassName("underlay")[0].style.backgroundColor = randomColor();
+    document.getElementsByClassName("underlay2")[0].style.backgroundColor = randomColor();
+     
     var canvas = document.getElementsByTagName('canvas')[0];
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -112,16 +115,11 @@ function init() {
     //hammer js gestures
     var mc = new Hammer(canvas);
     mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
-    mc.get('pinch').set({ enable: true });
+
     var panSpeed = 20;
     mc.on("pan", function (ev) {
         offsetX += ev.velocityX * panSpeed;
         offsetY += ev.velocityY * panSpeed;
-    });
-    mc.on("pinch", function (ev) {
-        pinchCenter = rawCenter(ev);
-        container.scaleX += ev.scale;
-        container.scaleY += ev.scale;
     });
     stage.update();
 
@@ -525,11 +523,11 @@ function update(e) {
     //run everything in here!
     if (!e.paused) {
         var canvas = document.getElementsByTagName('canvas')[0];
-        if (offsetY > 850 || offsetY < -750 || offsetX < -1100 || offsetX > 1000) {
-            canvas.style.backgroundColor = "black";
-        } else {
-            canvas.style.backgroundColor = "#00032e";
-        }
+        // if (offsetY > 850 || offsetY < -750 || offsetX < -1100 || offsetX > 1000) {
+        //     canvas.style.backgroundColor = "black";
+        // } else {
+        //     canvas.style.backgroundColor = "#00032e";
+        // }
         //updatePlanet();
         var angle = getAngle(getCenter(), selectedPlanet);
         if (selectedPlanet != planets[0].localPlanetContainer) {
@@ -577,6 +575,7 @@ function update(e) {
         } else if (rotateRightKey) {
             rotationOffset--;
         }
+            
         stage.alpha = 1;
         stage.update();
     }
@@ -1009,7 +1008,8 @@ function addPlanet(planetx, planety, radius, type) {
             //ground.graphics.drawCircle(0, 0, radius)
             groundColor = randomColor();
             addWater(planetx, planety, radius, water, water2, groundColor);
-
+            water.alpha = 1;
+            water2.alpha = 1;
             water2.scale = 1.1;
             localPlanetContainer.regX = sun.x;
             localPlanetContainer.regY = sun.y;

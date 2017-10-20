@@ -22,6 +22,14 @@
     <body>
 
         <body onload="init();">
+            <div class="underunderlay" style="z-index:0;position:absolute;top:0;left:0;width:100%;height:100%;">
+            </div>
+            <div id="stars">
+                <div class="underlay" style="z-index:0;position:absolute;top:-100%;left:-100%;width:300%;height:300%;">
+                </div>
+                <div class="underlay2" style="z-index:1;position:absolute;top:-100%;left:-100%;width:300%;height:300%;">
+                </div>
+            </div>
             <div id="custom-bootstrap-menu" class="navbar navbar-default" role="navigation" style="margin-bottom:0px;">
                 <div class="container-fluid">
                     <div class="navbar-header">
@@ -43,10 +51,12 @@
                     </div>
                 </div>
             </div>
-            <canvas id="canvas" style="overflow:hidden;">
-
-
+            <canvas id="canvas" style="z-index:1;overflow:hidden;">
             </canvas>
+            <div class="toolbar">
+                HI
+            </div>
+
         </body>
     </body>
 
