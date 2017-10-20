@@ -112,7 +112,7 @@ function init() {
 
     var mc = new Hammer(canvas);
     mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
-    var panSpeed = 10;
+    var panSpeed = 20;
     mc.on("pan", function (ev) {
         offsetX += ev.velocityX * panSpeed;
         offsetY += ev.velocityY * panSpeed;
