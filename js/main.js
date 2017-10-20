@@ -36,7 +36,6 @@ var selectRightKey = false;
 var rotateLeftKey = false;
 var rotateRightKey = false;
 
-var mouseDownPoint;
 function shadeColor2(color, percent) {
     var f = parseInt(color.slice(1), 16), t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = f >> 16, G = f >> 8 & 0x00FF, B = f & 0x0000FF;
     return "#" + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
@@ -110,18 +109,9 @@ function init() {
     selectedPlanet = planets[0].localPlanetContainer;
     stage.alpha = 0;
 
-    stage.on("mousedown", function (evt) {
-        mouseDownPoint = { x: evt.stageX, y: evt.stageY };
-    });
-    stage.on("pressmove", function (evt) {
-        if (evt.stageX > mouseDownPoint.x + 5)
-            offsetX += 5;
-        else if (evt.stageX < mouseDownPoint.x - 5)
-            offsetX -= 5;
-        if (evt.stageY > mouseDownPoint.y + 5)
-            offsetY += 5;
-        else if (evt.stageY < mouseDownPoint.y - 5)
-            offsetY -= 5;
+    selectedPlanet.on("pressmove", function (evt) {
+        offsetX = evt.stageX - window.innerWidth/2;
+        offsetY = evt.stageY- window.innerHeight/2;
     });
     stage.update();
 
