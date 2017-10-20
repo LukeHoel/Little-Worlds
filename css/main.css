@@ -41,8 +41,6 @@ canvas {
 visibility: hidden;
 }
 
-@media screen and (min-width: 768px) {
-
 .animate{
     
         -webkit-animation: anim 5s infinite; /* Safari 4.0 - 8.0 */
@@ -68,7 +66,7 @@ visibility: hidden;
         animation-delay: 2s;
     }
 
-}
+
 @media screen and (max-width: 768px) {
     
        
