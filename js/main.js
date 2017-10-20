@@ -108,7 +108,7 @@ function init() {
     }
     selectedPlanet = planets[0].localPlanetContainer;
     stage.alpha = 0;
-
+    createjs.Touch.enable(stage);
     selectedPlanet.on("pressmove", function (evt) {
         offsetX = evt.stageX - window.innerWidth/2;
         offsetY = evt.stageY- window.innerHeight/2;
