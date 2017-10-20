@@ -523,11 +523,6 @@ function update(e) {
     //run everything in here!
     if (!e.paused) {
         var canvas = document.getElementsByTagName('canvas')[0];
-        // if (offsetY > 850 || offsetY < -750 || offsetX < -1100 || offsetX > 1000) {
-        //     canvas.style.backgroundColor = "black";
-        // } else {
-        //     canvas.style.backgroundColor = "#00032e";
-        // }
         //updatePlanet();
         var angle = getAngle(getCenter(), selectedPlanet);
         if (selectedPlanet != planets[0].localPlanetContainer) {
