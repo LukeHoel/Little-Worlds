@@ -109,11 +109,15 @@ function init() {
     selectedPlanet = planets[0].localPlanetContainer;
     stage.alpha = 0;
     createjs.Touch.enable(stage);
-    canvas.addEventListener("touchmove", function (evt) {
-        var touch = evt.changedTouches[0];
-        offsetX = touch.pageX - window.innerWidth / 2;
-        offsetY = touch.pageY - window.innerHeight / 2;
-    }, false);
+
+    var mc = new Hammer(canvas);
+    mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+    var panSpeed = 10;
+    mc.on("pan", function (ev) {
+        offsetX += ev.velocityX * panSpeed;
+        offsetY += ev.velocityY * panSpeed;
+    });
+
     stage.update();
 
     createjs.Ticker.framerate = 60;
