@@ -525,15 +525,13 @@ function update(e) {
         var canvas = document.getElementsByTagName('canvas')[0];
         //updatePlanet();
         var angle = getAngle(getCenter(), selectedPlanet);
-        if (selectedPlanet != planets[0].localPlanetContainer) {
+
             if (plusKey) {
                 zoomIn();
             }
             if (minusKey) {
                 zoomOut();
             }
-
-        }
         var movement = shiftKey ? 2 : 1;
         for (var i = 0; i < movement; i++) {
             if (downKey) {
@@ -961,7 +959,10 @@ function luminanace(hex) {
     return luma;
 }
 function zoomIn() {
-    if (container.scaleX < 1) {
+    var allowedZoom = 1;
+    if (selectedPlanet == planets[0].localPlanetContainer) 
+    allowedZoom = 0.13
+    if (container.scaleX < allowedZoom) {
         container.scaleX += .03 + (container.scaleX / 20);
         container.scaleY += .03 + (container.scaleY / 20);
     }
