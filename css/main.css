@@ -79,6 +79,8 @@ visibility: hidden;
         height:40%;
         /* background-color: rgba(255,255,255,.2); */
         visibility: visible;
+        pointer-events: none;
+        opacity: 0;
     }
     .toolbarItem{
         position: absolute;
@@ -92,7 +94,7 @@ visibility: hidden;
         left:0px;
         top:0px;
         padding:15px;
-        background-color:rgb(225, 225, 225);
+        background-color:white;
         border-radius: 20px;
         -moz-border-radius: 20px;
         -webkit-border-radius: 20px;
@@ -100,10 +102,10 @@ visibility: hidden;
     .minus{
         top:70px;
     }
-    .rotateleft{
+    .rotateright{
         top:140px;
     }
-    .rotateright{
+    .rotateleft{
         top:210px;
     }
     }

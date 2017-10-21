@@ -53,21 +53,21 @@
             </div>
             <canvas id="canvas" style="z-index:1;overflow:hidden;">
             </canvas>
-            <div class="toolbar">
-                <div class="toolbarItem">
+            <div id="toolbar" class="toolbar">
+                <div id="plus" class="toolbarItem" onclick="toggleZoomIn()">
                     <i class="fa fa-plus fa-2x toolbarIcon"></i>
                 </div>
 
-                <div class="toolbarItem minus">
+                <div id="minus" class="toolbarItem minus" onclick="toggleZoomOut()">
                     <i class="fa fa-minus fa-2x toolbarIcon"></i>
                 </div>
-                
-                <div class="toolbarItem rotateleft">
-                    <i class="fa fa-rotate-left fa-2x toolbarIcon"></i>
+
+                <div id="rotateRight" class="toolbarItem rotateright" onclick="offsetBuffer -= rotateButtonAmount">
+                    <i class="fa fa-rotate-right fa-2x toolbarIcon"></i>
                 </div>
 
-                <div class="toolbarItem rotateright">
-                    <i class="fa fa-rotate-right fa-2x toolbarIcon"></i>
+                <div id="rotateLeft" class="toolbarItem rotateleft" onclick="offsetBuffer += rotateButtonAmount">
+                    <i class="fa fa-rotate-left fa-2x toolbarIcon"></i>
                 </div>
             </div>
         </body>

@@ -36,6 +36,12 @@ var selectRightKey = false;
 var rotateLeftKey = false;
 var rotateRightKey = false;
 
+var plusDown = false;
+var minusDown = false;
+var rotateLeftDown = false;
+var rotateRightDown = false;
+var offsetBuffer = 0;
+var rotateButtonAmount = 30;
 function shadeColor2(color, percent) {
     var f = parseInt(color.slice(1), 16), t = percent < 0 ? 0 : 255, p = percent < 0 ? percent * -1 : percent, R = f >> 16, G = f >> 8 & 0x00FF, B = f & 0x0000FF;
     return "#" + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
@@ -49,7 +55,7 @@ function debug() {
 function init() {
     document.getElementsByClassName("underlay")[0].style.backgroundColor = randomColor();
     document.getElementsByClassName("underlay2")[0].style.backgroundColor = randomColor();
-     
+
     var canvas = document.getElementsByTagName('canvas')[0];
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -120,6 +126,32 @@ function init() {
     mc.on("pan", function (ev) {
         offsetX += ev.velocityX * panSpeed;
         offsetY += ev.velocityY * panSpeed;
+    });
+
+
+    //buttons
+    var plus = new Hammer(document.getElementById("plus"));
+    plus.on("tap", function (ev) {
+        if (container.scaleX == .1) {
+            container.scaleX = 1;
+            container.scaleY = 1;
+            offsetY = getPlanet(selectedPlanet).radius;
+        }
+    });
+    var minus = new Hammer(document.getElementById("minus"));
+    minus.on("tap", function (ev) {
+        offsetX = 0;
+        offsetY = 0;
+        container.scaleX = 0.1;
+        container.scaleY = 0.1;
+    });
+    var rotateLeft = new Hammer(document.getElementById("rotateLeft"));
+    rotateLeft.on("tap", function (ev) {
+        offsetBuffer += rotateButtonAmount;
+    });
+    var rotateRight = new Hammer(document.getElementById("rotateRight"));
+    rotateRight.on("tap", function (ev) {
+        offsetBuffer -= rotateButtonAmount;
     });
     stage.update();
 
@@ -525,13 +557,14 @@ function update(e) {
         var canvas = document.getElementsByTagName('canvas')[0];
         //updatePlanet();
         var angle = getAngle(getCenter(), selectedPlanet);
-
+        if (selectedPlanet != planets[0].localPlanetContainer) {
             if (plusKey) {
                 zoomIn();
             }
             if (minusKey) {
                 zoomOut();
             }
+        }
         var movement = shiftKey ? 2 : 1;
         for (var i = 0; i < movement; i++) {
             if (downKey) {
@@ -568,8 +601,17 @@ function update(e) {
         } else if (rotateRightKey) {
             rotationOffset--;
         }
-            
+
         stage.alpha = 1;
+        if (offsetBuffer != 0) {
+            if (offsetBuffer > 0) {
+                offsetBuffer--;
+                rotationOffset++;
+            } else {
+                offsetBuffer++;
+                rotationOffset--;
+            }
+        }
         stage.update();
     }
 }
@@ -959,18 +1001,15 @@ function luminanace(hex) {
     return luma;
 }
 function zoomIn() {
-    var allowedZoom = 1;
-    if (selectedPlanet == planets[0].localPlanetContainer) 
-    allowedZoom = 0.13
-    if (container.scaleX < allowedZoom) {
-        container.scaleX += .03 + (container.scaleX / 20);
-        container.scaleY += .03 + (container.scaleY / 20);
+    if (container.scaleX < 1) {
+        container.scaleX += .03;
+        container.scaleY += .03;
     }
 }
 function zoomOut() {
     if (container.scaleX > .05) {
-        container.scaleX += -.03 - (container.scaleX / 20);
-        container.scaleY += -.03 - (container.scaleY / 20);
+        container.scaleX += -.03;
+        container.scaleY += -.03;
     }
 }
 function addPlanet(planetx, planety, radius, type) {
@@ -1106,10 +1145,12 @@ function addPlanet(planetx, planety, radius, type) {
             offsetX = 0;
             offsetY = 0;
             rotationOffset = 0
-
+            var toolbar = document.getElementById("toolbar");
             if (selectedPlanet != planets[0].localPlanetContainer) {
                 container.scaleX = 0.1;
                 container.scaleY = 0.1;
+                toolbar.style.pointerEvents = "auto";
+                toolbar.style.opacity = 1;
             } else {
                 if (!isSmallScreen()) {
                     container.scaleX = .04;
@@ -1118,6 +1159,8 @@ function addPlanet(planetx, planety, radius, type) {
                     container.scaleX = .02;
                     container.scaleY = .02;
                 }
+                toolbar.style.pointerEvents = "none";
+                toolbar.style.opacity = 0;
             }
         }
     })
@@ -1163,6 +1206,7 @@ function updatePlanets() {
         }
         if (planet.foliageInfo.length < minimumPlants && planet.foliageInfo.length < minimumPlants) {
             placeFoliage(planet.landSegments, planet.colors, planet.foliageContainer, planet.foliageInfo, planet.treeContainer, planet.treeInfo);
+
         }
     }
 }
@@ -1171,4 +1215,23 @@ function updateAsteroids() {
         asteroids[i].asteroid.rotation += asteroids[i].rotationSpeed;
     }
     asteroidBeltContainer.rotation += .03;
+}
+function toggleZoomIn() {
+    if (container.scaleX == .1) {
+        container.scaleX = 1;
+        container.scaleY = 1;
+        offsetY = getPlanet(selectedPlanet).radius;
+    }
+}
+function toogleZoomOut() {
+    offsetX = 0;
+    offsetY = 0;
+    container.scaleX = 0.1;
+    container.scaleY = 0.1;
+}
+function getPlanet(localPlanetContainer) {
+    for (var i = 0; i < planets.length; i++) {
+        if (planets[i].localPlanetContainer == localPlanetContainer)
+            return planets[i];
+    }
 }
