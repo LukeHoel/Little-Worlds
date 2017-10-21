@@ -1004,7 +1004,7 @@ function addPlanet(planetx, planety, radius, type) {
             groundColor = randomColor();
             addWater(planetx, planety, radius, water, water2, groundColor);
             water.alpha = 1;
-            water2.alpha = 1;
+            water2.alpha = .5;
             water2.scale = 1.1;
             localPlanetContainer.regX = sun.x;
             localPlanetContainer.regY = sun.y;
